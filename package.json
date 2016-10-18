@@ -1,13 +1,13 @@
 {
-  "name": "react-f-your-starterkit",
+  "name": "udacity-trainschedule",
   "version": "0.1.1",
-  "description": "For all of your reactjs starter kit needs",
-  "keywords": "reactjs, starter kit",
+  "description": "Udacity Train Schedule: Project 2",
+  "keywords": "udacity, train schedule",
   "author": "noah edward hall <noahedwardhall@gmail.com> (https://twitter.com/noahedwardhall)",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/noahehall/react-f-your-starterkit.git"
+    "url": "https://github.com/noahehall/udacity-trainschedule.git"
   },
   "scripts": {
     "prestart": "npm run eslint-fix",

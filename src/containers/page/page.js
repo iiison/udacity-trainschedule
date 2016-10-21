@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
-import * as actionCreators from 'actions';
+import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
 
 import styles from './page.css';

@@ -5,7 +5,6 @@ export const stations = Immutable({
   '16th': '16th St. Mission (SF)',
   '19th': '19th St. Oakland',
   '24th': '24th St. Mission (SF)',
-  'Abbr': 'Station Name',
   'ashb': 'Ashby (Berkeley)',
   'balb': 'Balboa Park (SF)',
   'bayf': 'Bay Fair (San Leandro)',

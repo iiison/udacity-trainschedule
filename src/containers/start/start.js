@@ -21,7 +21,7 @@ class Start extends React.Component {
 
     const selected = Array.from(options).filter((opt) => opt.value === val);
 
-    console.log('val', val, 'key',selected[0].dataset.bartkey);
+    console.log('val', val, 'key', selected[0].dataset.bartkey);
     //http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=ASHB&dest=CIVC&date=now&key=MW9S-E7SL-26DU-VV8V&b=2&a=2&l=1
     //http://api.bart.gov/docs/sched/index.aspx
   }

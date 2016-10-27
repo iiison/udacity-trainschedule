@@ -31,7 +31,6 @@ const options = {
   }
 };
 
-
 function renderFullPage(html, preloadedState) {
   const head = Helmet.rewind();
 
@@ -73,6 +72,9 @@ app.get("*", (req, res) => {
     //setup store based on data sent in
     const store = configure(Immutable({
       msg: 'for your starter kit needs!',
+      stations: {
+        msg: 'Click to get stations',
+      }
     }));
     const initialState = store.getState();
 

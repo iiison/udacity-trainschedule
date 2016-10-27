@@ -1,15 +1,13 @@
 import React from 'react';
 import styles from './start.css';
-import { stations } from 'constants.js';
+import { connect } from 'react-redux';
+import * as actionCreators from 'store/actions/index.js';
+import { bindActionCreators } from 'redux';
 
 class Start extends React.Component {
-  getStations = () => {
-    const newStations = [];
-    for (const key in stations) newStations.push(
-      <option data-bartkey={key} key={key} value={stations[key]} />
-    );
-
-    return newStations;
+  static propTypes = {
+    dispatch: React.PropTypes.object.isRequired,
+    stations: React.PropTypes.object.isRequired,
   }
 
   handleSubmit = (e) => {
@@ -25,11 +23,22 @@ class Start extends React.Component {
     //http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=ASHB&dest=CIVC&date=now&key=MW9S-E7SL-26DU-VV8V&b=2&a=2&l=1
     //http://api.bart.gov/docs/sched/index.aspx
   }
+
+  getStations = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.props.dispatch.getStations({});
+  }
+
   render() {
     return (
       <div className='main'>
         <style scoped type='text/css'>{styles}</style>
         <h2>Lets get started!</h2>
+        <form onSubmit={this.getStations}>
+          <input style={{border: '2px solid black'}} type='submit' value='Update Stations' />
+        </form>
         <form onSubmit={this.handleSubmit}>
           <p>I want to</p>
           <p>
@@ -51,12 +60,22 @@ class Start extends React.Component {
           <label htmlFor='arrive-time'> by
             <input id='arrive-time' type='datetime-local' />
           </label>
-          <datalist id='stations'><select id='stations-select'>{this.getStations()}</select></datalist>
-          <input type='submit' />
+          <datalist id='stations'><select id='stations-select'>{}</select></datalist>
+          <input type='submit' value='Submit' />
         </form>
       </div>
     );
   }
 }
 
-export default Start;
+const mapStateToProps = (state) =>
+  ({
+    stations: state.stations,
+  });
+
+const mapDispatchToProps = (dispatch) =>
+  ({
+    dispatch: bindActionCreators(actionCreators, dispatch),
+  });
+
+export default connect(mapStateToProps, mapDispatchToProps)(Start);

@@ -313,7 +313,7 @@ module.exports = {
     "no-unreachable": 2,
     "no-unsafe-finally": 2,
     "no-unsafe-negation": 2,
-    "no-unused-expressions": 2,
+    "no-unused-expressions": 1,
     "no-unused-labels": 2,
     "no-unused-vars": 2,
     "no-use-before-define": 2,

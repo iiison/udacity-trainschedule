@@ -72,9 +72,7 @@ app.get("*", (req, res) => {
     //setup store based on data sent in
     const store = configure(Immutable({
       msg: 'for your starter kit needs!',
-      stations: {
-        msg: 'Click to get stations',
-      }
+      stations: {}
     }));
     const initialState = store.getState();
 

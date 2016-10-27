@@ -7,6 +7,7 @@ import { bindActionCreators } from 'redux';
 class Start extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.object.isRequired,
+    schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
   }
 
@@ -15,54 +16,91 @@ class Start extends React.Component {
     e.stopPropagation();
     const
       options = e.currentTarget['stations-select'].options,
-      val = e.currentTarget['depart-station'].value;
+      depart = e.currentTarget['depart-station'].value,
+      arrive = e.currentTarget['arrive-station'].value;
 
-    const selected = Array.from(options).filter((opt) => opt.value === val);
+    const to = Array.from(options).filter((opt) => opt.value === arrive)[0].dataset.abbr;
+    const from = Array.from(options).filter((opt) => opt.value === depart)[0].dataset.abbr;
+    console.log('from', from, 'to', to);
 
-    console.log('val', val, 'key', selected[0].dataset.bartkey);
-    //http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=ASHB&dest=CIVC&date=now&key=MW9S-E7SL-26DU-VV8V&b=2&a=2&l=1
-    //http://api.bart.gov/docs/sched/index.aspx
+    return from && to ? this.props.dispatch.getSchedules(from, to) : undefined;
   }
 
   getStations = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e){
+      e.preventDefault();
+      e.stopPropagation();
 
-    this.props.dispatch.getStations({});
+      return this.props.dispatch.getStations();
+    }
+
+    let stations;
+    try {
+      stations = this.props.stations.data.stations[0].station.map((station, idx) =>
+        <option
+          data-abbr={station.abbr}
+          key={`${station.name}${idx}`}
+        >
+          {station.name}
+        </option>
+      );
+    }catch (err) {
+      stations = 'Please click the button above to get stations';
+    }
+
+    return stations;
   }
 
+  makeScheduleForm = () =>
+    <form onSubmit={this.handleSubmit}>
+      <p>
+        <label htmlFor='depart-station'>I want to leave&nbsp;
+          <input
+            id='depart-station'
+            list='stations'
+            required
+            style={{border: '2px solid black'}}
+          />
+        </label>
+      </p>
+      <p>
+        <label htmlFor='depart-time'>around
+          <input id='depart-time' type='datetime-local' />
+        </label>
+      </p>
+      <p>
+        <label htmlFor='arrive-station'>and arrive at&nbsp;
+          <input id='arrive-station' list='stations' required style={{border: '2px solid black'}} />
+        </label>
+      </p>
+      <label htmlFor='arrive-time'> by
+        <input id='arrive-time' type='datetime-local' />
+      </label>
+      <datalist id='stations'>
+        <select id='stations-select'>{this.getStations()}</select>
+      </datalist>
+      <input style={{border: '2px solid black'}} type='submit' value='Submit' />
+    </form>;
+
+  renderSchedules(){
+    if (this.props.schedules.status !=='SUCCESS') return '';
+
+    return <div>{JSON.stringify(this.props.schedules.data.schedule[0])}</div>;
+  }
   render() {
     return (
       <div className='main'>
         <style scoped type='text/css'>{styles}</style>
         <h2>Lets get started!</h2>
+        {this.renderSchedules()}
         <form onSubmit={this.getStations}>
           <input style={{border: '2px solid black'}} type='submit' value='Update Stations' />
         </form>
-        <form onSubmit={this.handleSubmit}>
-          <p>I want to</p>
-          <p>
-            <label htmlFor='depart-station'> leave
-              <input id='depart-station' list='stations' />
-            </label>
-          </p>
-          <p>
-            <label htmlFor='depart-time'>around
-              <input id='depart-time' type='datetime-local' />
-            </label>
-          </p>
-          <p>and</p>
-          <p>
-            <label htmlFor='arrive-station'> arrive at
-              <input id='arrive-station' list='stations' />
-            </label>
-          </p>
-          <label htmlFor='arrive-time'> by
-            <input id='arrive-time' type='datetime-local' />
-          </label>
-          <datalist id='stations'><select id='stations-select'>{}</select></datalist>
-          <input type='submit' value='Submit' />
-        </form>
+        {
+          this.props.stations.status === 'SUCCESS' ?
+            this.makeScheduleForm():
+            'Please get current list of stations'
+        }
       </div>
     );
   }
@@ -70,7 +108,8 @@ class Start extends React.Component {
 
 const mapStateToProps = (state) =>
   ({
-    stations: state.stations,
+    schedules: state.gotSchedules,
+    stations: state.gotStations,
   });
 
 const mapDispatchToProps = (dispatch) =>

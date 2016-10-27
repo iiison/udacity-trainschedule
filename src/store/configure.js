@@ -2,7 +2,7 @@
 import { compose, createStore, applyMiddleware } from 'redux';
 import { combineReducers, routerReducer, stateTransformer } from 'redux-seamless-immutable';
 import thunk from 'redux-thunk';
-// import promise from 'redux-promise';
+import promise from 'redux-promise';
 import createLogger from 'redux-logger';
 import * as reducers from './reducers';
 
@@ -29,6 +29,7 @@ export default (initialState) => {
       applyMiddleware(
         thunk,
         loggerMiddleware,
+        promise,
       ),
       reduxTools
     )

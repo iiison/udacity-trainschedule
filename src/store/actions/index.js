@@ -1,5 +1,6 @@
-import * as actionCreators from 'store/actions/index.js';
 import axios from 'axios';
+import { parseString } from 'xml2js';
+import consts from 'constants.js';
 
 export function updateMsg(text) {
   return {
@@ -8,40 +9,68 @@ export function updateMsg(text) {
   };
 }
 
-export function getStations({
+export function gotSchedules({
   data = {},
-  status = 'PENDING',
-  }) {
+  status = 'UNKNOWN',
+  type = 'GOT_SCHEDULES',
+}) {
+  return {
+    data,
+    status,
+    type
+  };
+}
+
+export function getSchedules(depart, arrive) {
   return (dispatch) => {
-    switch (status) {
-      case 'PENDING': {
-        return axios.get('http://api.bart.gov/api/stn.aspx?cmd=stns&key=Z44S-5LSG-9QVT-DWE9')
-        .then((response) => dispatch(actionCreators.getStations({
-          data: response,
-          status: 'SUCCESS',
-        })))
-        .catch((error) => {
-          console.log('got error', error);
+    dispatch(gotSchedules({
+      data: 'pending',
+      status: 'PENDING',
+    }));
 
-          return dispatch(actionCreators.getStations({
-            data: error,
-            status: 'ERROR',
-          }));
-        });
-      }
-      case 'SUCCESS': {
-        console.log('got success', data);
+    return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${depart}&dest=${arrive}&date=now&key=${consts.apikey}&b=2&a=2&l=1`)
+    .then((response) => parseString(response.data, (err, result) =>
+      dispatch(gotSchedules({
+        data: result.root || err,
+        status: 'SUCCESS',
+      }))
+    ))
+    .catch((error) => dispatch(gotSchedules({
+      data: error,
+      status: 'ERROR',
+    })));
+  };
+}
 
-        return Immutable({ ...state, stations: data });
-      }
-      case 'ERROR': {
-        break;
-      }
-      default: {
-        console.log('oops, made it in default');
+export function gotStations({
+  data = {},
+  status = 'UNKNOWN',
+  type = 'GOT_STATIONS',
+}) {
+  return {
+    data,
+    status,
+    type
+  };
+}
 
-        return state;
-      }
-    }
+export function getStations() {
+  return (dispatch) => {
+    dispatch(gotStations({
+      data: 'pending',
+      status: 'PENDING',
+    }));
+
+    return axios.get(`http://api.bart.gov/api/stn.aspx?cmd=stns&key=${consts.apikey}`)
+    .then((response) => parseString(response.data, (err, result) =>
+      dispatch(gotStations({
+        data: result.root || err,
+        status: 'SUCCESS',
+      }))
+    ))
+    .catch((error) => dispatch(gotStations({
+      data: error,
+      status: 'ERROR',
+    })));
   };
 }

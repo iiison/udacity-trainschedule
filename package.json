@@ -39,7 +39,8 @@
     "redux-seamless-immutable": "^0.3.0",
     "redux-thunk": "^2.1.0",
     "seamless-immutable": "^6.3.0",
-    "spdy": "^3.4.4"
+    "spdy": "^3.4.4",
+    "xml2js": "^0.4.17"
   },
   "devDependencies": {
     "babel-eslint": "^6.1.2",

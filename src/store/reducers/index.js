@@ -6,11 +6,23 @@ export function msg(state = Immutable({}), action) {
     state;
 }
 
-export function getStations(state = Immutable({}), action) {
-  if (action.type !== 'GET_STATIONS') return state;
+export function gotStations(state = Immutable({}), action) {
+  if (action.type !== 'GOT_STATIONS') return state;
 
   return Immutable({
     ...state,
-    stations: action.data
+    data: action.data,
+    status: action.status || 'oops'
+  });
+}
+
+export function gotSchedules(state = Immutable({}), action) {
+  if (action.type !== 'GOT_SCHEDULES') return state;
+
+  console.log('got schedules', action);
+  return Immutable({
+    ...state,
+    data: action.data,
+    status: action.status || 'oops'
   });
 }

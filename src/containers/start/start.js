@@ -6,6 +6,7 @@ import { bindActionCreators } from 'redux';
 
 class Start extends React.Component {
   static propTypes = {
+    appError: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
@@ -19,9 +20,14 @@ class Start extends React.Component {
       depart = e.currentTarget['depart-station'].value,
       options = e.currentTarget['stations-select'].options;
 
-    const to = Array.from(options).filter((opt) => opt.value === arrive)[0].dataset.abbr;
-    const from = Array.from(options).filter((opt) => opt.value === depart)[0].dataset.abbr;
-    console.log('from', from, 'to', to);
+    let from, to;
+
+    try {
+      to = Array.from(options).filter((opt) => opt.value === arrive)[0].dataset.abbr;
+      from = Array.from(options).filter((opt) => opt.value === depart)[0].dataset.abbr;
+    } catch (err) {
+      return this.props.dispatch.appError('You have selected incorrect stations');
+    }
 
     return from && to ? this.props.dispatch.getSchedules(from, to) : undefined;
   }
@@ -85,7 +91,11 @@ class Start extends React.Component {
   renderSchedules(){
     if (this.props.schedules.status !=='SUCCESS') return '';
 
-    let trips, leaveAt, arriveAt, fare;
+    let
+      arriveAt,
+      fare,
+      leaveAt,
+      trips;
 
     try {
       //date = this.props.schedules.data.schedule[0].data,
@@ -98,14 +108,26 @@ class Start extends React.Component {
       trips = leaveAt = arriveby = fare = 'sorry! something went wrong';
     }
 
-    return <div style={{'wordWrap':'break-word', marginBottom: '10px'}}>
+    return <div style={{
+      marginBottom: '10px',
+      wordWrap:'break-word',
+    }}>
       Your train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}
     </div>;
+  }
+
+  renderErrors() {
+    console.log('errors are', this.props.appError);
+
+    return this.props.appError.msg ?
+      <h1>{this.props.appError.msg}</h1> :
+      '';
   }
   render() {
     return (
       <div className='main'>
         <style scoped type='text/css'>{styles}</style>
+        {this.renderErrors()}
         <h2>Lets get started!</h2>
         {this.renderSchedules()}
         <form onSubmit={this.getStations}>
@@ -123,6 +145,7 @@ class Start extends React.Component {
 
 const mapStateToProps = (state) =>
   ({
+    appError: state.appError,
     schedules: state.gotSchedules,
     stations: state.gotStations,
   });

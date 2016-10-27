@@ -9,6 +9,13 @@ export function updateMsg(text) {
   };
 }
 
+export function appError(text) {
+  return {
+    text,
+    type: 'APP_ERROR',
+  };;
+}
+
 export function gotSchedules({
   data = {},
   status = 'UNKNOWN',
@@ -28,6 +35,7 @@ export function getSchedules(depart, arrive) {
       status: 'PENDING',
     }));
 
+    dispatch(appError(''));
     return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${depart}&dest=${arrive}&date=now&key=${consts.apikey}&b=0&a=2&l=1`)
     .then((response) => parseString(response.data, (err, result) =>
       dispatch(gotSchedules({

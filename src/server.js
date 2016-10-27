@@ -71,13 +71,14 @@ app.get("*", (req, res) => {
     if (!renderProps) return res.status(404).end('Not found.');
     //setup store based on data sent in
     const store = configure(Immutable({
+      appError: { msg: ''},
       gotSchedules: {
-        status: undefined
+        status: ''
       },
       gotStations: {
-        status: undefined
+        status: ''
       },
-      msg: 'for your starter kit needs!',
+      msg: 'Plan your next bart trip!',
     }));
     const initialState = store.getState();
 

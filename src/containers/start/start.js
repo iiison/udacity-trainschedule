@@ -15,9 +15,9 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
     const
-      options = e.currentTarget['stations-select'].options,
+      arrive = e.currentTarget['arrive-station'].value,
       depart = e.currentTarget['depart-station'].value,
-      arrive = e.currentTarget['arrive-station'].value;
+      options = e.currentTarget['stations-select'].options;
 
     const to = Array.from(options).filter((opt) => opt.value === arrive)[0].dataset.abbr;
     const from = Array.from(options).filter((opt) => opt.value === depart)[0].dataset.abbr;
@@ -85,7 +85,22 @@ class Start extends React.Component {
   renderSchedules(){
     if (this.props.schedules.status !=='SUCCESS') return '';
 
-    return <div>{JSON.stringify(this.props.schedules.data.schedule[0])}</div>;
+    let trips, leaveAt, arriveAt, fare;
+
+    try {
+      //date = this.props.schedules.data.schedule[0].data,
+      //time = this.props.schedules.data.schedule[0].time,
+      trips = this.props.schedules.data.schedule[0].request[0].trip[0].$;
+      leaveAt = trips.origTimeMin;
+      arriveAt = trips.destTimeMin;
+      fare = trips.fare;
+    } catch (e) {
+      trips = leaveAt = arriveby = fare = 'sorry! something went wrong';
+    }
+
+    return <div style={{'wordWrap':'break-word', marginBottom: '10px'}}>
+      Your train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}
+    </div>;
   }
   render() {
     return (

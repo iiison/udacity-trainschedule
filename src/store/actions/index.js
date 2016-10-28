@@ -37,7 +37,7 @@ export function getSchedules(depart, arrive) {
 
     dispatch(appError(''));
 
-    return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${depart}&dest=${arrive}&date=now&key=${consts.apikey}&b=0&a=2&l=1`)
+    return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${depart}&dest=${arrive}&date=now&key=${consts.apikey}&b=0&a=4&l=1`)
     .then((response) => parseString(response.data, (err, result) =>
       dispatch(gotSchedules({
         data: result.root || err,

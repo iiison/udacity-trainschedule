@@ -95,12 +95,18 @@ class Start extends React.Component {
       arriveAt,
       fare,
       leaveAt,
-      trips;
+      trips,
+      trips2,
+      trips3,
+      trips4;
 
     try {
       //date = this.props.schedules.data.schedule[0].data,
       //time = this.props.schedules.data.schedule[0].time,
       trips = this.props.schedules.data.schedule[0].request[0].trip[0].$;
+      trips2 = this.props.schedules.data.schedule[0].request[0].trip[1].$ || {};
+      trips3 = this.props.schedules.data.schedule[0].request[0].trip[2].$ || {};
+      trips4 = this.props.schedules.data.schedule[0].request[0].trip[3].$ || {};
       leaveAt = trips.origTimeMin;
       arriveAt = trips.destTimeMin;
       fare = trips.fare;
@@ -122,6 +128,31 @@ class Start extends React.Component {
       wordWrap:'break-word',
     }}>
       Your train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}
+      <table>
+        <tbody>
+          <tr>
+            <th>cost</th><th>leave at</th><th>arrive at</th>
+          </tr>
+          <tr>
+            <td>${fare}</td><td>{leaveAt}</td><td>{arriveAt}</td>
+          </tr>
+          <tr>
+            <td>${trips2.fare}</td>
+            <td>{trips2.origTimeMin}</td>
+            <td>{trips2.destTimeMin}</td>
+          </tr>
+          <tr>
+            <td>${trips3.fare}</td>
+            <td>{trips3.origTimeMin}</td>
+            <td>{trips3.destTimeMin}</td>
+          </tr>
+          <tr>
+            <td>${trips4.fare}</td>
+            <td>{trips4.origTimeMin}</td>
+            <td>{trips4.destTimeMin}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>;
   }
 

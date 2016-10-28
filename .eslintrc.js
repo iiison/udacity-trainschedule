@@ -311,7 +311,7 @@ module.exports = {
     "no-unmodified-loop-condition": 0,
     "no-unneeded-ternary": 2,
     "no-unreachable": 2,
-    "no-unsafe-finally": 2,
+    "no-unsafe-finally": 1,
     "no-unsafe-negation": 2,
     "no-unused-expressions": 1,
     "no-unused-labels": 2,

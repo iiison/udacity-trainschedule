@@ -3,6 +3,7 @@ import styles from './start.css';
 import { connect } from 'react-redux';
 import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
+import * as dom from 'lib/dom.js';
 
 class Start extends React.Component {
   static propTypes = {
@@ -23,8 +24,8 @@ class Start extends React.Component {
     let from, to;
 
     try {
-      to = Array.from(options).filter((opt) => opt.value === arrive)[0].dataset.abbr;
-      from = Array.from(options).filter((opt) => opt.value === depart)[0].dataset.abbr;
+      to = Array.from(options).find((opt) => opt.value === arrive).dataset.abbr;
+      from = Array.from(options).find((opt) => opt.value === depart).dataset.abbr;
     } catch (err) {
       return this.props.dispatch.appError('You have selected incorrect stations');
     }
@@ -45,7 +46,13 @@ class Start extends React.Component {
       stations = this.props.stations.data.stations[0].station.map((station, idx) =>
         <option
           data-abbr={station.abbr}
-          key={`${station.name}${idx}`}
+          data-address={station.address}
+          data-city={station.city}
+          data-county={station.county}
+          data-name={station.name}
+          data-state={station.state}
+          data-zipcode={station.zipcode}
+          key={`${station.abbr}${idx}`}
         >
           {station.name}
         </option>
@@ -57,6 +64,22 @@ class Start extends React.Component {
     return stations;
   }
 
+  getStation = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    let thisEl;
+    try {
+      thisEl = this.props.stations.data.stations[0].station.find((station) =>
+        station.name[0] === e.currentTarget.value
+      ).address[0];
+    } catch (err) {
+      thisEl = '';
+    } finally {
+      return dom.setNextInnerHtml(e.currentTarget, thisEl);
+    }
+  }
+
   makeScheduleForm = () =>
     <form onSubmit={this.handleSubmit}>
       <p>
@@ -64,9 +87,11 @@ class Start extends React.Component {
           <input
             id='depart-station'
             list='stations'
+            onChange={this.getStation}
             required
             style={{border: '2px solid black'}}
           />
+          <span className='more-info' />
         </label>
       </p>
       <p>
@@ -76,7 +101,14 @@ class Start extends React.Component {
       </p>
       <p>
         <label htmlFor='arrive-station'>and arrive at&nbsp;
-          <input id='arrive-station' list='stations' required style={{border: '2px solid black'}} />
+          <input
+            id='arrive-station'
+            list='stations'
+            onChange={this.getStation}
+            required
+            style={{border: '2px solid black'}}
+          />
+          <span className='more-info' />
         </label>
       </p>
       <label htmlFor='arrive-time'> by
@@ -127,7 +159,8 @@ class Start extends React.Component {
       marginBottom: '10px',
       wordWrap:'break-word',
     }}>
-      Your train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}
+      the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}<br /><br />
+      See below for the next four stations <br /><br />
       <table>
         <tbody>
           <tr>

@@ -1,18 +1,25 @@
+/**
+ * inserts a child textNode into the previous element, based on the current elements validationMessage and title properties
+ * @method setPreviousElementError
+ * @param  {HTMLElement} el an element with a validationMessage and title property
+ */
 export const setPreviousElementError = (el) =>
   el.previousSibling.firstElementChild.innerHTML = `${el.validationMessage}<br />${el.title}`;
 
+/**
+ * inserts a child textNode into an element, based on another elements validationMessage
+ * @method clearPreviousElementError
+ * @param  {[type]}                  el [description]
+ * @return {[type]}                  [description]
+ */
 export const clearPreviousElementError = (el) =>
   el.previousSibling.firstElementChild.innerHTML = el.validationMessage;
 
-export const setFirstChildElementError = (el, msg = false) => {
-  const thisEl = el.querySelector('.error');
-  thisEl.innerHTML = msg || 'Please correct all errors before continuing';
-};
+export const setFirstChildElementError = (el, msg = false) =>
+  el.querySelector('.error').innerHTML = msg || 'Please correct all errors before continuing';
 
-export const clearFirstChildElementError = (el, msg = false) => {
-  const thisEl = el.querySelector('.error');
-  thisEl.innerHTML = msg || '';
-};
+export const clearFirstChildElementError = (el, msg = false) =>
+  el.querySelector('.error').innerHTML = msg || '';
 
 export const checkValidOnBlur = (e, setError = false) => {
   const el = e.currentTarget;
@@ -28,3 +35,6 @@ export const checkValidOnBlur = (e, setError = false) => {
 
   return true;
 };
+
+export const setNextInnerHtml = (el, str) =>
+  el.nextElementSibling.innerHTML = str || '';

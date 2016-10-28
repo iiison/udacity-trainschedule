@@ -18,14 +18,16 @@ class Start extends React.Component {
   }
 
   handleSubmit = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if(e.preventDefault) e.preventDefault();
+    if(e.stopPropagation) e.stopPropagation();
+
+    const thisTarget = e.currentTarget || e;
     const scheduleConfigDepartBool = this.props.scheduleConfig.depart;
     const
-      arrive = e.currentTarget['arrive-station'].value,
-      dateTime = time.getBartTime(e.currentTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
-      depart = e.currentTarget['depart-station'].value,
-      options = e.currentTarget['stations-select'].options;
+      arrive = thisTarget['arrive-station'].value,
+      dateTime = time.getBartTime(thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
+      depart = thisTarget['depart-station'].value,
+      options = thisTarget['stations-select'].options;
 
     let from, to;
 
@@ -152,11 +154,11 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    return this.props.dispatch.scheduleConfigDepart();
+    return this.props.dispatch.scheduleConfigDepart() && this.handleSubmit(document.getElementById('schedule-form'));
   }
 
   makeScheduleForm = () =>
-    <form onSubmit={this.handleSubmit}>
+    <form id='schedule-form' onSubmit={this.handleSubmit}>
       <Popup
         btnClass='mm-popup__btn'
         className='mm-popup'
@@ -174,8 +176,8 @@ class Start extends React.Component {
             onChange={this.getStation}
             required
             style={{border: '2px solid black'}}
-          />
-          <button className='more-info sike' onClick={this.getMoreInfo} />
+          />&nbsp;
+          <button className='more-info sike' onClick={this.getMoreInfo} style={{border: '2px solid black'}} />
         </label>
       </p>
       {this.getScheduleConfig('depart') &&
@@ -193,8 +195,8 @@ class Start extends React.Component {
             onChange={this.getStation}
             required
             style={{border: '2px solid black'}}
-          />
-          <button className='more-info sike' onClick={this.getMoreInfo} />
+          />&nbsp;
+          <button className='more-info sike' onClick={this.getMoreInfo} style={{border: '2px solid black'}} />
         </label>
       </p>
       {!this.getScheduleConfig('depart') &&
@@ -254,8 +256,8 @@ class Start extends React.Component {
       wordWrap:'break-word',
     }}>
       <div>Schedule for {scheduleDate} that {this.props.scheduleConfig.depart ? 'leaves' : 'arrives'} by {scheduleTime}</div>
-      <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div>
-      See below for the next four stations <br /><br />
+      <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div><br />
+      See below for the best four stations <br /><br />
       <table>
         <tbody>
           <tr>

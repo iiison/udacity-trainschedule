@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
 import * as dom from 'lib/dom.js';
+import Popup from 'react-popup';
 
 class Start extends React.Component {
   static propTypes = {
@@ -70,9 +71,9 @@ class Start extends React.Component {
 
     let thisEl;
     try {
-      thisEl = this.props.stations.data.stations[0].station.find((station) =>
+      thisEl = `${this.props.stations.data.stations[0].station.find((station) =>
         station.name[0] === e.currentTarget.value
-      ).address[0];
+      ).address[0] }... click for more info`;
     } catch (err) {
       thisEl = '';
     } finally {
@@ -80,8 +81,25 @@ class Start extends React.Component {
     }
   }
 
+  getMoreInfo(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    return /click for more info$/ig.test(e.currentTarget.innerHTML) &&
+      Popup.alert(e.currentTarget.innerHTML);
+  }
+
   makeScheduleForm = () =>
     <form onSubmit={this.handleSubmit}>
+      <Popup
+        btnClass='mm-popup__btn'
+        className='mm-popup'
+        closeBtn={true}
+        closeHtml={null}
+        defaultCancel='Cancel'
+        defaultOk='Ok'
+        wildClasses={false}
+      />
       <p>
         <label htmlFor='depart-station'>I want to leave&nbsp;
           <input
@@ -91,7 +109,7 @@ class Start extends React.Component {
             required
             style={{border: '2px solid black'}}
           />
-          <span className='more-info' />
+          <button className='more-info' onClick={this.getMoreInfo} />
         </label>
       </p>
       <p>
@@ -108,7 +126,7 @@ class Start extends React.Component {
             required
             style={{border: '2px solid black'}}
           />
-          <span className='more-info' />
+          <button className='more-info' onClick={this.getMoreInfo} />
         </label>
       </p>
       <label htmlFor='arrive-time'> by
@@ -194,6 +212,7 @@ class Start extends React.Component {
 
     return error ? <h1>{this.props.appError.msg}</h1> : '';
   }
+
   render() {
     return (
       <div className='main'>

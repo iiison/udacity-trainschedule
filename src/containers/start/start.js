@@ -166,7 +166,6 @@ class Start extends React.Component {
         defaultOk='Ok'
         wildClasses={false}
       />
-      <button onClick={this.switchScheduleConfig}>Switch Schedule Type</button>
       <p>
         <label htmlFor='depart-station'>I want to leave&nbsp;
           <input
@@ -181,8 +180,8 @@ class Start extends React.Component {
       </p>
       {this.getScheduleConfig('depart') &&
         <p>
-          <label htmlFor='depart-time'>around
-            <input id='depart-time' type='datetime-local' />
+          <label htmlFor='depart-time'>around&nbsp;
+            <input id='depart-time' style={{border: '2px solid black'}} type='datetime-local' />
           </label>
         </p>
       }
@@ -200,13 +199,13 @@ class Start extends React.Component {
       </p>
       {!this.getScheduleConfig('depart') &&
         <p>
-          <label htmlFor='arrive-time'> by
-            <input id='arrive-time' type='datetime-local' />
+          <label htmlFor='arrive-time'> by&nbsp;
+            <input id='arrive-time' style={{border: '2px solid black'}} type='datetime-local' />
           </label>
         </p>
       }
       <datalist id='stations'>
-        <select id='stations-select'>{this.getStations()}</select>
+        <select id='stations-select' >{this.getStations()}</select>
       </datalist>
       <input style={{border: '2px solid black'}} type='submit' value='Submit' />
     </form>;
@@ -299,7 +298,15 @@ class Start extends React.Component {
         <h2>Lets get started!</h2>
         {this.renderSchedules()}
         <form onSubmit={this.getStations}>
-          <input style={{border: '2px solid black'}} type='submit' value='Update Stations' />
+          <input
+            style={{border: '2px solid black'}}
+            type='submit'
+            value='Update Stations'
+          />&nbsp;
+          <button
+            onClick={this.switchScheduleConfig}
+            style={{border: '2px solid black'}}
+          >Type: {this.props.scheduleConfig.depart ? 'Departing' : 'Arriving'}</button>
         </form>
         {
           this.props.stations.status === 'SUCCESS' ?

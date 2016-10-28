@@ -190,15 +190,15 @@ class Start extends React.Component {
             list='stations'
             onChange={this.getStation}
             required
-            style={{border: '2px solid black'}}
+
           />&nbsp;
-          <button className='more-info sike' onClick={this.getMoreInfo} style={{border: '2px solid black'}} />
+          <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
       {this.getScheduleConfig('depart') &&
         <p>
           <label htmlFor='depart-time'>around&nbsp;
-            <input id='depart-time' style={{border: '2px solid black'}} type='datetime-local' />
+            <input id='depart-time' type='datetime-local' />
           </label>
         </p>
       }
@@ -209,22 +209,22 @@ class Start extends React.Component {
             list='stations'
             onChange={this.getStation}
             required
-            style={{border: '2px solid black'}}
+
           />&nbsp;
-          <button className='more-info sike' onClick={this.getMoreInfo} style={{border: '2px solid black'}} />
+          <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
       {!this.getScheduleConfig('depart') &&
         <p>
           <label htmlFor='arrive-time'> by&nbsp;
-            <input id='arrive-time' style={{border: '2px solid black'}} type='datetime-local' />
+            <input id='arrive-time' type='datetime-local' />
           </label>
         </p>
       }
       <datalist id='stations'>
         <select id='stations-select' >{this.getStations()}</select>
       </datalist>
-      <input style={{border: '2px solid black'}} type='submit' value='Submit' />
+      <input type='submit' value='Submit' />
     </form>;
 
   renderSchedules(){
@@ -312,24 +312,24 @@ class Start extends React.Component {
       <div className='start'>
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors()}
-        <h2>Lets get started!</h2>
         {this.renderSchedules()}
-        <form onSubmit={this.getStations}>
-          <input
-            style={{border: '2px solid black'}}
-            type='submit'
-            value='Update Stations'
-          />&nbsp;
-          <button
-            onClick={this.switchScheduleConfig}
-            style={{border: '2px solid black'}}
-          >Type: {this.props.scheduleConfig.depart ? 'Departing' : 'Arriving'}</button>
-        </form>
-        {
-          this.props.stations.status === 'SUCCESS' ?
-            this.makeScheduleForm():
-            'Please get current list of stations'
-        }
+        <section id='start-forms'>
+          <form id='station-form' onSubmit={this.getStations}>
+            <input
+
+              type='submit'
+              value='Get Stations'
+            />&nbsp;
+            <button
+              onClick={this.switchScheduleConfig}
+
+            >Type: {this.props.scheduleConfig.depart ? 'Departing' : 'Arriving'}</button>
+          </form>
+          {
+            this.props.stations.status === 'SUCCESS' &&
+            this.makeScheduleForm()
+          }
+        </section>
       </div>
     );
   }

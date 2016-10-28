@@ -78,7 +78,7 @@ app.get("*", (req, res) => {
       gotStations: {
         status: ''
       },
-      msg: 'Plan your next bart trip!',
+      msg: 'Bart Train Scheduler',
       scheduleConfig: {
         depart: true
       },

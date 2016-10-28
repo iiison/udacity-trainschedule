@@ -18,8 +18,15 @@ class Page extends React.Component {
       <div className='page'>
         <Helmet
           htmlAttributes={{lang: 'en'}}
+          link={[
+            {
+              'href': 'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela Round',
+              'rel': 'stylesheet',
+              type:'text/css',
+            },
+          ]}
           meta={[
-            {content: "React F Your Starterkit by @noahedwardhall", name: "description"},
+            {content: 'React F Your Starterkit by @noahedwardhall', name: 'description'},
             {content: 'Home', property: 'og:title'},
           ]}
           title='React For Your Starterkit'

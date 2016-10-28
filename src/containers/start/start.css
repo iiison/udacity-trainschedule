@@ -1,4 +1,51 @@
+:root {
+  --prim-col-one: #A18CED;
+  --prim-col-two: #F0DCCB;
+}
+
 .start {
+  font-size: 16px;
+
+  & #start-forms {
+    background-color: var(--prim-col-one);
+    padding: 10px;
+
+    & button,
+    & input {
+      border-color: var(--prim-col-two);
+      border-style: solid;
+      border-width: 2px;
+    }
+
+    & p {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    & #station-form {
+      text-align: center;
+    }
+
+    & #schedule-form {
+      & label {
+        width: 100%;
+
+        & button {
+          float: right;
+        }
+
+        & input {
+          float: right;
+          width: 200px;
+        }
+      }
+
+      & input[type=submit] {
+        margin: 0 auto;
+      }
+    }
+  }
+
   & .more-info {
     &.sike {
       display: none;

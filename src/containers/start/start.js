@@ -6,6 +6,7 @@ import { bindActionCreators } from 'redux';
 import * as dom from 'lib/dom.js';
 import Popup from 'react-popup';
 import Stationinfo from 'components/stationinfo/stationinfo.js';
+import * as time from 'lib/time.js';
 
 class Start extends React.Component {
   static propTypes = {
@@ -20,7 +21,9 @@ class Start extends React.Component {
     e.stopPropagation();
     const
       arrive = e.currentTarget['arrive-station'].value,
+      arriveDateTime = time.getBartTime(e.currentTarget['arrive-time'].value),
       depart = e.currentTarget['depart-station'].value,
+      departDateTime = time.getBartTime(e.currentTarget['depart-time'].value),
       options = e.currentTarget['stations-select'].options;
 
     let from, to;
@@ -32,7 +35,11 @@ class Start extends React.Component {
       return this.props.dispatch.appError('You have selected incorrect stations');
     }
 
-    return from && to ? this.props.dispatch.getSchedules(from, to) : undefined;
+    const
+      departDate = departDateTime.substring(0, departDateTime.indexOf(' ')).trim(),
+      departTime = departDateTime.substring(departDateTime.indexOf(' ')).trim();
+
+    return from && to ? this.props.dispatch.getSchedules(from, to, departDate, departTime) : undefined;
   }
 
   getStations = (e) => {
@@ -186,15 +193,17 @@ class Start extends React.Component {
 
     let
       arriveAt,
-      fare,
       leaveAt,
+      scheduleDate,
+      scheduleTime,
+      fare,
       trips,
       trips2,
       trips3,
       trips4;
 
     try {
-      //date = this.props.schedules.data.schedule[0].data,
+      //date = ,
       //time = this.props.schedules.data.schedule[0].time,
       trips = this.props.schedules.data.schedule[0].request[0].trip[0].$;
       trips2 = this.props.schedules.data.schedule[0].request[0].trip[1].$ || {};
@@ -202,6 +211,8 @@ class Start extends React.Component {
       trips4 = this.props.schedules.data.schedule[0].request[0].trip[3].$ || {};
       leaveAt = trips.origTimeMin;
       arriveAt = trips.destTimeMin;
+      scheduleDate = this.props.schedules.data.schedule[0].date[0];
+      scheduleTime = this.props.schedules.data.schedule[0].time[0];
       fare = trips.fare;
     } catch (e) {
       trips = leaveAt = arriveAt = fare = undefined;
@@ -220,7 +231,8 @@ class Start extends React.Component {
       marginBottom: '10px',
       wordWrap:'break-word',
     }}>
-      the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}<br /><br />
+      <div>Schedule for {scheduleDate} that leaves by {scheduleTime}</div>
+      <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div>
       See below for the next four stations <br /><br />
       <table>
         <tbody>

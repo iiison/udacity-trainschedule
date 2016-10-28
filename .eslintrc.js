@@ -254,7 +254,7 @@ module.exports = {
     "no-lonely-if": 2,
     "no-loop-func": 0,
     "no-magic-numbers": 0,
-    "no-mixed-operators": 2,
+    "no-mixed-operators": [1, {"allowSamePrecedence": true}],
     "no-mixed-requires": 2,
     "no-mixed-spaces-and-tabs": 2,
     "no-multi-spaces": 2,

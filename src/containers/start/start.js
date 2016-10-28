@@ -5,6 +5,7 @@ import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
 import * as dom from 'lib/dom.js';
 import Popup from 'react-popup';
+import Stationinfo from 'components/stationinfo/stationinfo.js';
 
 class Start extends React.Component {
   static propTypes = {
@@ -77,16 +78,58 @@ class Start extends React.Component {
     } catch (err) {
       thisEl = '';
     } finally {
-      return dom.setNextInnerHtml(e.currentTarget, thisEl);
+      return dom.setNextInnerHtml(e.currentTarget, 'more');
     }
   }
 
-  getMoreInfo(e) {
+  getMoreInfo = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    return /click for more info$/ig.test(e.currentTarget.innerHTML) &&
-      Popup.alert(e.currentTarget.innerHTML);
+    let thisEl;
+    const
+      address = e.currentTarget.innerHTML.substring(0, e.currentTarget.innerHTML.indexOf('.')),
+      stationinfo = {
+        abbr: undefined,
+        address: undefined,
+        city: undefined,
+        county: undefined,
+        name: undefined,
+        thisEl: undefined,
+        zipcode: undefined,
+      };
+
+    try {
+      thisEl = this.props.stations.data.stations[0].station.find((station) =>
+        station.address[0] === address
+      );
+      if (thisEl) {
+        stationinfo.name = thisEl.name[0];
+        stationinfo.abbr = thisEl.abbr[0];
+        stationinfo.city = thisEl.city[0];
+        stationinfo.county = thisEl.county[0];
+        stationinfo.zipcode = thisEl.zipcode[0];
+        stationinfo.address = address;
+      }
+    } catch (err) {
+      console.log('error in setting station info', err);
+    }
+
+    return /^more$/ig.test(e.currentTarget.innerHTML) &&
+      // Popup.alert(e.currentTarget.innerHTML);
+      Popup.create({
+        buttons: {
+          // left: ['cancel'],
+          right: [{
+            action: (popup) => popup.close(),
+            text: 'Ok',
+            // className: 'special-btn', // optional
+          }]
+        },
+        className: 'alert',
+        content: <Stationinfo {...stationinfo} /> || 'No information found',
+        title: stationinfo.name && `${stationinfo.name} Station Information` || 'Bart Station Information',
+      });
   }
 
   makeScheduleForm = () =>
@@ -94,7 +137,7 @@ class Start extends React.Component {
       <Popup
         btnClass='mm-popup__btn'
         className='mm-popup'
-        closeBtn={true}
+        closeBtn={false}
         closeHtml={null}
         defaultCancel='Cancel'
         defaultOk='Ok'

@@ -89,7 +89,7 @@ class Start extends React.Component {
     </form>;
 
   renderSchedules(){
-    if (this.props.schedules.status !=='SUCCESS') return '';
+    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return '';
 
     let
       arriveAt,
@@ -105,7 +105,16 @@ class Start extends React.Component {
       arriveAt = trips.destTimeMin;
       fare = trips.fare;
     } catch (e) {
-      trips = leaveAt = arriveby = fare = 'sorry! something went wrong';
+      trips = leaveAt = arriveAt = fare = undefined;
+      let error;
+      try {
+        error = `${this.props.schedules.data.message[0].error[0].text[0]}
+        ${this.props.schedules.data.message[0].error[0].details[0]}`;
+
+        return this.props.dispatch.appError(error);
+      } catch (er) {
+        return '';
+      }
     }
 
     return <div style={{
@@ -117,11 +126,9 @@ class Start extends React.Component {
   }
 
   renderErrors() {
-    console.log('errors are', this.props.appError);
+    const error = this.props.appError.msg;
 
-    return this.props.appError.msg ?
-      <h1>{this.props.appError.msg}</h1> :
-      '';
+    return error ? <h1>{this.props.appError.msg}</h1> : '';
   }
   render() {
     return (

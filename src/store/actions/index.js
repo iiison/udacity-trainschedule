@@ -9,11 +9,11 @@ export function updateMsg(text) {
   };
 }
 
-export function appError(text) {
+export function appError(data) {
   return {
-    text,
+    data,
     type: 'APP_ERROR',
-  };;
+  };
 }
 
 export function gotSchedules({
@@ -36,6 +36,7 @@ export function getSchedules(depart, arrive) {
     }));
 
     dispatch(appError(''));
+
     return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${depart}&dest=${arrive}&date=now&key=${consts.apikey}&b=0&a=2&l=1`)
     .then((response) => parseString(response.data, (err, result) =>
       dispatch(gotSchedules({
@@ -76,7 +77,7 @@ export function getStations() {
         status: 'SUCCESS',
       }))
     ))
-    .catch((error) => dispatch(gotStations({
+    .catch((error) => dispatch(appError({
       data: error,
       status: 'ERROR',
     })));

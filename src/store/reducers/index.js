@@ -7,10 +7,8 @@ export function msg(state = Immutable({}), action) {
 }
 
 export function appError(state = Immutable({}), action) {
-  console.log('action is', action);
-
   return action.type === 'APP_ERROR' ?
-    Immutable({ ...state, msg: action.text }) :
+    Immutable({ ...state, msg: action.data }) :
     state;
 }
 

@@ -21,7 +21,6 @@ class Start extends React.Component {
     e.stopPropagation();
     const
       arrive = e.currentTarget['arrive-station'].value,
-      arriveDateTime = time.getBartTime(e.currentTarget['arrive-time'].value),
       depart = e.currentTarget['depart-station'].value,
       departDateTime = time.getBartTime(e.currentTarget['depart-time'].value),
       options = e.currentTarget['stations-select'].options;
@@ -193,10 +192,10 @@ class Start extends React.Component {
 
     let
       arriveAt,
+      fare,
       leaveAt,
       scheduleDate,
       scheduleTime,
-      fare,
       trips,
       trips2,
       trips3,

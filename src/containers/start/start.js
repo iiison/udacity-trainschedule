@@ -17,7 +17,8 @@ class Start extends React.Component {
     stations: React.PropTypes.object.isRequired,
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = (e, setTime) => {
+    if (!e) return false;
     if(e.preventDefault) e.preventDefault();
     if(e.stopPropagation) e.stopPropagation();
 
@@ -25,7 +26,7 @@ class Start extends React.Component {
     const scheduleConfigDepartBool = this.props.scheduleConfig.depart;
     const
       arrive = thisTarget['arrive-station'].value,
-      dateTime = time.getBartTime(thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
+      dateTime = time.getBartTime(setTime || thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
 
@@ -35,7 +36,7 @@ class Start extends React.Component {
       to = Array.from(options).find((opt) => opt.value === arrive).dataset.abbr;
       from = Array.from(options).find((opt) => opt.value === depart).dataset.abbr;
     } catch (err) {
-      return this.props.dispatch.appError('You have selected incorrect stations');
+      return this.props.dispatch.appError('The selected stations do not exist');
     }
 
     const
@@ -154,7 +155,21 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    return this.props.dispatch.scheduleConfigDepart() && this.handleSubmit(document.getElementById('schedule-form'));
+    let thisTime;
+    try {
+      thisTime = document.getElementById('arrive-time').value;
+    } catch (err) {
+      try {
+        thisTime = document.getElementById('depart-time').value;
+      } catch (err2) {
+        // do nothing
+      }
+    }
+
+    this.props.dispatch.scheduleConfigDepart();
+
+    return document.getElementsByClassName('more-info sike').length === 0 ?
+      this.handleSubmit(document.getElementById('schedule-form'), thisTime) : false;
   }
 
   makeScheduleForm = () =>

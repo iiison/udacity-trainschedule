@@ -79,6 +79,9 @@ app.get("*", (req, res) => {
         status: ''
       },
       msg: 'Plan your next bart trip!',
+      scheduleConfig: {
+        depart: true
+      },
     }));
     const initialState = store.getState();
 

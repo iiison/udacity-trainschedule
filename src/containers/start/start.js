@@ -12,6 +12,7 @@ class Start extends React.Component {
   static propTypes = {
     appError: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.object.isRequired,
+    scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
   }
@@ -19,10 +20,11 @@ class Start extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const scheduleConfigDepartBool = this.props.scheduleConfig.depart;
     const
       arrive = e.currentTarget['arrive-station'].value,
+      dateTime = time.getBartTime(e.currentTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
       depart = e.currentTarget['depart-station'].value,
-      departDateTime = time.getBartTime(e.currentTarget['depart-time'].value),
       options = e.currentTarget['stations-select'].options;
 
     let from, to;
@@ -35,10 +37,16 @@ class Start extends React.Component {
     }
 
     const
-      departDate = departDateTime.substring(0, departDateTime.indexOf(' ')).trim(),
-      departTime = departDateTime.substring(departDateTime.indexOf(' ')).trim();
+      thisDate = dateTime.substring(0, dateTime.indexOf(' ')).trim(),
+      thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
-    return from && to ? this.props.dispatch.getSchedules(from, to, departDate, departTime) : undefined;
+    return from && to ? this.props.dispatch.getSchedules({
+      from,
+      scheduleConfigDepartBool,
+      thisDate,
+      thisTime,
+      to,
+    }) : undefined;
   }
 
   getStations = (e) => {
@@ -138,6 +146,15 @@ class Start extends React.Component {
       });
   }
 
+  getScheduleConfig = (type) => this.props.scheduleConfig[type];
+
+  switchScheduleConfig = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    return this.props.dispatch.scheduleConfigDepart();
+  }
+
   makeScheduleForm = () =>
     <form onSubmit={this.handleSubmit}>
       <Popup
@@ -149,6 +166,7 @@ class Start extends React.Component {
         defaultOk='Ok'
         wildClasses={false}
       />
+      <button onClick={this.switchScheduleConfig}>Switch Schedule Type</button>
       <p>
         <label htmlFor='depart-station'>I want to leave&nbsp;
           <input
@@ -161,11 +179,13 @@ class Start extends React.Component {
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
-      <p>
-        <label htmlFor='depart-time'>around
-          <input id='depart-time' type='datetime-local' />
-        </label>
-      </p>
+      {this.getScheduleConfig('depart') &&
+        <p>
+          <label htmlFor='depart-time'>around
+            <input id='depart-time' type='datetime-local' />
+          </label>
+        </p>
+      }
       <p>
         <label htmlFor='arrive-station'>and arrive at&nbsp;
           <input
@@ -178,9 +198,13 @@ class Start extends React.Component {
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
-      <label htmlFor='arrive-time'> by
-        <input id='arrive-time' type='datetime-local' />
-      </label>
+      {!this.getScheduleConfig('depart') &&
+        <p>
+          <label htmlFor='arrive-time'> by
+            <input id='arrive-time' type='datetime-local' />
+          </label>
+        </p>
+      }
       <datalist id='stations'>
         <select id='stations-select'>{this.getStations()}</select>
       </datalist>
@@ -230,7 +254,7 @@ class Start extends React.Component {
       marginBottom: '10px',
       wordWrap:'break-word',
     }}>
-      <div>Schedule for {scheduleDate} that leaves by {scheduleTime}</div>
+      <div>Schedule for {scheduleDate} that {this.props.scheduleConfig.depart ? 'leaves' : 'arrives'} by {scheduleTime}</div>
       <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div>
       See below for the next four stations <br /><br />
       <table>
@@ -290,6 +314,7 @@ class Start extends React.Component {
 const mapStateToProps = (state) =>
   ({
     appError: state.appError,
+    scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
     stations: state.gotStations,
   });

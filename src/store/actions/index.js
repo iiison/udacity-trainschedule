@@ -16,6 +16,12 @@ export function appError(data) {
   };
 }
 
+export function scheduleConfigDepart() {
+  return {
+    type: 'SCHEDULE_CONFIG_DEPART',
+  };
+}
+
 export function gotSchedules({
   data = {},
   status = 'UNKNOWN',
@@ -28,7 +34,7 @@ export function gotSchedules({
   };
 }
 
-export function getSchedules(from, to, date, time) {
+export function getSchedules({from, to, thisDate, thisTime, scheduleConfigDepartBool}) {
   return (dispatch) => {
     dispatch(gotSchedules({
       data: 'pending',
@@ -37,7 +43,12 @@ export function getSchedules(from, to, date, time) {
 
     dispatch(appError(''));
 
-    return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=depart&orig=${from}&dest=${to}&date=${date || 'now'}&time=${time || ''}&key=${consts.apikey}&b=0&a=4&l=1`)
+    const
+      cmd = scheduleConfigDepartBool ? 'depart' : 'arrive',
+      date = `&date=${thisDate || 'now'}`,
+      time = thisTime ? `&time=${thisTime}` : '';
+
+    return axios.get(`http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${date}${time}&key=${consts.apikey}&b=0&a=4&l=1`)
     .then((response) => parseString(response.data, (err, result) =>
       dispatch(gotSchedules({
         data: result.root || err,

@@ -6,6 +6,11 @@ export function msg(state = Immutable({}), action) {
     state;
 }
 
+export function scheduleConfig(state = Immutable({}), action) {
+  return action.type === 'SCHEDULE_CONFIG_DEPART' ?
+    Immutable({...state, depart: !state.depart}) : state;
+}
+
 export function appError(state = Immutable({}), action) {
   return action.type === 'APP_ERROR' ?
     Immutable({ ...state, msg: action.data }) :

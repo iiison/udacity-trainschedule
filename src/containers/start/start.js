@@ -70,15 +70,15 @@ class Start extends React.Component {
     e.stopPropagation();
     e.preventDefault();
 
-    let thisEl;
+    let abbr;
     try {
-      thisEl = `${this.props.stations.data.stations[0].station.find((station) =>
+      abbr = `${this.props.stations.data.stations[0].station.find((station) =>
         station.name[0] === e.currentTarget.value
-      ).address[0] }... click for more info`;
+      ).abbr[0] }`;
     } catch (err) {
-      thisEl = '';
+      abbr = '';
     } finally {
-      return dom.setNextInnerHtml(e.currentTarget, 'more');
+      return dom.setNextInnerHtml(e.currentTarget, abbr);
     }
   }
 
@@ -88,7 +88,7 @@ class Start extends React.Component {
 
     let thisEl;
     const
-      address = e.currentTarget.innerHTML.substring(0, e.currentTarget.innerHTML.indexOf('.')),
+      abbr = e.currentTarget.dataset.abbr,
       stationinfo = {
         abbr: undefined,
         address: undefined,
@@ -101,7 +101,7 @@ class Start extends React.Component {
 
     try {
       thisEl = this.props.stations.data.stations[0].station.find((station) =>
-        station.address[0] === address
+        station.abbr[0] === abbr
       );
       if (thisEl) {
         stationinfo.name = thisEl.name[0];
@@ -109,13 +109,13 @@ class Start extends React.Component {
         stationinfo.city = thisEl.city[0];
         stationinfo.county = thisEl.county[0];
         stationinfo.zipcode = thisEl.zipcode[0];
-        stationinfo.address = address;
+        stationinfo.address = thisEl.address[0];
       }
     } catch (err) {
       console.log('error in setting station info', err);
     }
 
-    return /^more$/ig.test(e.currentTarget.innerHTML) &&
+    return abbr &&
       // Popup.alert(e.currentTarget.innerHTML);
       Popup.create({
         buttons: {

@@ -36,5 +36,24 @@ export const checkValidOnBlur = (e, setError = false) => {
   return true;
 };
 
-export const setNextInnerHtml = (el, str) =>
-  el.nextElementSibling.innerHTML = str || '';
+/**
+ * set innner html and data attribute
+ * @method setNextInnerHtml
+ * @param  {[type]}         el   [description]
+ * @param  {[type]}         data [description]
+ * @param  {[type]}         str  [description]
+ */
+export const setNextInnerHtml = (el, abbr, str) => {
+  if (!el) return false;
+  if (!abbr) {
+    el.nextElementSibling.innerHTML = '';
+    el.nextElementSibling.dataset.abbr = '';
+
+    return false;
+  }
+
+  el.nextElementSibling.dataset.abbr = abbr;
+  el.nextElementSibling.innerHTML = str || 'more';
+
+  return el;
+};

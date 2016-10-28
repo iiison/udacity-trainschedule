@@ -43,12 +43,13 @@ class Start extends React.Component {
       thisDate = dateTime.substring(0, dateTime.indexOf(' ')).trim(),
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
-    return from && to ? this.props.dispatch.getSchedules({
+    return from && to ? this.props.dispatch.getBart({
       from,
       scheduleConfigDepartBool,
       thisDate,
       thisTime,
       to,
+      type: 'schedules',
     }) : undefined;
   }
 
@@ -57,7 +58,7 @@ class Start extends React.Component {
       e.preventDefault();
       e.stopPropagation();
 
-      return this.props.dispatch.getStations();
+      return this.props.dispatch.getBart({type: 'stations'});
     }
 
     let stations;

@@ -45,15 +45,19 @@ export const checkValidOnBlur = (e, setError = false) => {
  */
 export const setNextInnerHtml = (el, abbr, str) => {
   if (!el) return false;
+
+  const thisEl = el.nextElementSibling;
   if (!abbr) {
-    el.nextElementSibling.innerHTML = '';
-    el.nextElementSibling.dataset.abbr = '';
+    thisEl.innerHTML = '';
+    thisEl.dataset.abbr = '';
+    thisEl.className = 'more-info sike';
 
     return false;
   }
 
-  el.nextElementSibling.dataset.abbr = abbr;
-  el.nextElementSibling.innerHTML = str || 'more';
+  thisEl.dataset.abbr = abbr;
+  thisEl.innerHTML = str || 'more';
+  thisEl.className = 'more-info';
 
-  return el;
+  return thisEl;
 };

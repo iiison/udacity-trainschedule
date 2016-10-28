@@ -152,7 +152,7 @@ class Start extends React.Component {
             required
             style={{border: '2px solid black'}}
           />
-          <button className='more-info' onClick={this.getMoreInfo} />
+          <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
       <p>
@@ -169,7 +169,7 @@ class Start extends React.Component {
             required
             style={{border: '2px solid black'}}
           />
-          <button className='more-info' onClick={this.getMoreInfo} />
+          <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
       </p>
       <label htmlFor='arrive-time'> by
@@ -258,7 +258,7 @@ class Start extends React.Component {
 
   render() {
     return (
-      <div className='main'>
+      <div className='start'>
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors()}
         <h2>Lets get started!</h2>

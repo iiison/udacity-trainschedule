@@ -185,7 +185,7 @@ class Start extends React.Component {
         wildClasses={false}
       />
       <p>
-        <label htmlFor='depart-station'>I want to leave&nbsp;
+        <label htmlFor='depart-station'><span>I want to leave </span>
           <input
             id='depart-station'
             list='stations'
@@ -198,13 +198,13 @@ class Start extends React.Component {
       </p>
       {this.getScheduleConfig('depart') &&
         <p>
-          <label htmlFor='depart-time'>around&nbsp;
+          <label htmlFor='depart-time'><span>around </span>
             <input id='depart-time' type='datetime-local' />
           </label>
         </p>
       }
       <p>
-        <label htmlFor='arrive-station'>and arrive at&nbsp;
+        <label htmlFor='arrive-station'><span>and arrive at </span>
           <input
             id='arrive-station'
             list='stations'
@@ -217,7 +217,7 @@ class Start extends React.Component {
       </p>
       {!this.getScheduleConfig('depart') &&
         <p>
-          <label htmlFor='arrive-time'> by&nbsp;
+          <label htmlFor='arrive-time'><span>by </span>
             <input id='arrive-time' type='datetime-local' />
           </label>
         </p>
@@ -267,10 +267,7 @@ class Start extends React.Component {
       }
     }
 
-    return <div style={{
-      marginBottom: '10px',
-      wordWrap:'break-word',
-    }}>
+    return <div className='schedules'>
       <div>Schedule for {scheduleDate} that {this.props.scheduleConfig.depart ? 'leaves' : 'arrives'} by {scheduleTime}</div>
       <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div><br />
       See below for the best four stations <br /><br />

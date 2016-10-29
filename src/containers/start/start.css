@@ -1,6 +1,7 @@
 :root {
-  --prim-col-one: #A18CED;
+  --prim-col-one: #F2F2F2;
   --prim-col-two: #F0DCCB;
+  --prim-col-three: #DBD6F0;
 }
 
 .start {
@@ -29,14 +30,25 @@
     & #schedule-form {
       & label {
         width: 100%;
+        display: block;
+        position: relative;
+        overflow: hidden;
 
-        & button {
-          float: right;
+        & span {
+          display: inline-block;
+          width: 25%;
+          float: left;
         }
 
         & input {
+          display: inline-block;
+          width: 70%;
           float: right;
-          width: 200px;
+        }
+
+        & button {
+          float: right;
+          clear: both;
         }
       }
 
@@ -50,5 +62,11 @@
     &.sike {
       display: none;
     }
+  }
+
+  & .schedules {
+    padding: 10px;
+    background-color: var(--prim-col-three);
+    word-wrap: 'break-word';
   }
 }

@@ -8,12 +8,13 @@ body {
   padding: 20px;
 
   & .navbar {
-    font-family: 'Varela Round', Muli;
+    background-color: buttonface;
+    font-family: Varela Round, Muli;
+    height: 75px;
     list-style-type: none;
     margin: 0;
-    padding: 0;
     overflow: hidden;
-    background-color: buttonface;
+    padding: 0;
 
     & .navitem {
       float: left;
@@ -145,7 +146,6 @@ body {
             outline: none;
             text-decoration: none;
             cursor: pointer;
-            font-family: "Open Sans", sans-serif;
           }
         }
 

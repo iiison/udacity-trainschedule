@@ -56,7 +56,7 @@ export function getBart({from, to, thisDate, thisTime, scheduleConfigDepartBool,
   switch (type) {
     case 'stationInfo': {
       functionName = gotStationInfo;
-      url = `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${consts.apikey}`;
+      url = `http://api.bart.gov/api/stn.aspx?cmd=stninfo&orig=${from}&key=${consts.apikey}`;
       break;
     }
     case 'stations': {
@@ -69,7 +69,7 @@ export function getBart({from, to, thisDate, thisTime, scheduleConfigDepartBool,
       date = `&date=${thisDate || 'now'}`,
       functionName = gotSchedules;
       time = thisTime ? `&time=${thisTime}` : '';
-      url = `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${date}${time}&key=${consts.apikey}&b=0&a=4&l=1`;
+      url = `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${date}${time}&key=${consts.apikey}&b=4&a=4&l=1`;
       break;
     }
     default: return false;
@@ -86,12 +86,19 @@ export function getBart({from, to, thisDate, thisTime, scheduleConfigDepartBool,
     dispatch(appError(''));
 
     return axios.get(url)
-    .then((response) => parseString(response.data, (err, result) =>
-      dispatch(functionName({
-        data: result.root || err,
-        status: 'SUCCESS',
-      }))
-    ))
+    .then((response) => parseString(response.data, (err, result) => {
+      try {
+        const errorMessage = `${result.root.message[0].error[0].text[0]}
+        ${result.root.message[0].error[0].details[0]}`;
+
+        return dispatch(appError(errorMessage));
+      } catch (err2) {
+        return dispatch(functionName({
+          data: result.root || err2,
+          status: 'SUCCESS',
+        }));
+      }
+    }))
     .catch((error) => dispatch(appError({
       data: error,
       status: 'ERROR',

@@ -22,11 +22,16 @@ class Start extends React.Component {
     if(e.preventDefault) e.preventDefault();
     if(e.stopPropagation) e.stopPropagation();
 
-    const thisTarget = e.currentTarget || e;
-    const scheduleConfigDepartBool = this.props.scheduleConfig.depart;
+    const
+      scheduleConfigDepartBool = this.props.scheduleConfig.depart,
+      thisTarget = e.currentTarget || e;
+
     const
       arrive = thisTarget['arrive-station'].value,
-      dateTime = time.getBartTime(setTime || thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value),
+      dateTime = time.getBartTime(
+        setTime ||
+        thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value
+      ),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
 
@@ -130,7 +135,7 @@ class Start extends React.Component {
         stationinfo.address = thisEl.address[0];
       }
     } catch (err) {
-      console.log('error in setting station info', err);
+      // do nothing
     }
 
     return abbr &&
@@ -228,75 +233,59 @@ class Start extends React.Component {
       <input type='submit' value='Submit' />
     </form>;
 
-  renderSchedules(){
-    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return '';
+  /**
+   * returns renderable list
+   * @method getSavedSchedules
+   * @return {HTMLElement|null}          [description]
+   */
+  getSavedSchedules = () => {
+    if (this.props.appError.msg) return [];
 
-    let
-      arriveAt,
-      fare,
-      leaveAt,
-      scheduleDate,
-      scheduleTime,
-      trips,
-      trips2,
-      trips3,
-      trips4;
+    let allSchedules, formattedSchedules;
 
     try {
-      //date = ,
-      //time = this.props.schedules.data.schedule[0].time,
-      trips = this.props.schedules.data.schedule[0].request[0].trip[0].$;
-      trips2 = this.props.schedules.data.schedule[0].request[0].trip[1].$ || {};
-      trips3 = this.props.schedules.data.schedule[0].request[0].trip[2].$ || {};
-      trips4 = this.props.schedules.data.schedule[0].request[0].trip[3].$ || {};
-      leaveAt = trips.origTimeMin;
-      arriveAt = trips.destTimeMin;
-      scheduleDate = this.props.schedules.data.schedule[0].date[0];
-      scheduleTime = this.props.schedules.data.schedule[0].time[0];
-      fare = trips.fare;
-    } catch (e) {
-      trips = leaveAt = arriveAt = fare = undefined;
-      let error;
-      try {
-        error = `${this.props.schedules.data.message[0].error[0].text[0]}
-        ${this.props.schedules.data.message[0].error[0].details[0]}`;
+      allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
+      if (!allSchedules.length) return [];
 
-        return this.props.dispatch.appError(error);
-      } catch (er) {
-        return '';
-      }
+      formattedSchedules = allSchedules.map((trip, idx) =>
+        <tr key={idx}>
+          <td>
+            {trip.$.fare}
+          </td>
+          <td>
+            {trip.$.origTimeMin} {trip.$.origTimeDate}
+          </td>
+          <td>
+            {trip.$.destTimeMin} {trip.$.destTimeDate}
+          </td>
+        </tr>
+      );
+    } catch (err) {
+      return [];
     }
 
-    return <div className='schedules'>
-      <div>Schedule for {scheduleDate} that {this.props.scheduleConfig.depart ? 'leaves' : 'arrives'} by {scheduleTime}</div>
-      <div>the next train leaves at {leaveAt} and will arrive at {arriveAt} and cost ${fare}</div><br />
-      See below for the best four stations <br /><br />
-      <table>
-        <tbody>
-          <tr>
-            <th>cost</th><th>leave at</th><th>arrive at</th>
-          </tr>
-          <tr>
-            <td>${fare}</td><td>{leaveAt}</td><td>{arriveAt}</td>
-          </tr>
-          <tr>
-            <td>${trips2.fare}</td>
-            <td>{trips2.origTimeMin}</td>
-            <td>{trips2.destTimeMin}</td>
-          </tr>
-          <tr>
-            <td>${trips3.fare}</td>
-            <td>{trips3.origTimeMin}</td>
-            <td>{trips3.destTimeMin}</td>
-          </tr>
-          <tr>
-            <td>${trips4.fare}</td>
-            <td>{trips4.origTimeMin}</td>
-            <td>{trips4.destTimeMin}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>;
+    return formattedSchedules;
+  }
+
+  renderSchedules = () => {
+    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return '';
+
+    const formattedSchedules = this.getSavedSchedules();
+
+    if (Array.isArray(formattedSchedules) && !formattedSchedules.length) return null;
+
+    return (
+      <div className='schedules'>
+        <table>
+          <tbody>
+            <tr>
+              <th>cost</th><th>leave at</th><th>arrive at</th>
+            </tr>
+            {formattedSchedules}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 
   renderErrors() {

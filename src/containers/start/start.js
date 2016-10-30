@@ -7,6 +7,7 @@ import * as dom from 'lib/dom.js';
 import Popup from 'react-popup';
 import Stationinfo from 'components/stationinfo/stationinfo.js';
 import * as time from 'lib/time.js';
+import { Table } from 'reactabular';
 
 class Start extends React.Component {
   static propTypes = {
@@ -241,30 +242,60 @@ class Start extends React.Component {
   getSavedSchedules = () => {
     if (this.props.appError.msg) return [];
 
-    let allSchedules, formattedSchedules;
+    let
+      allSchedules,
+      tableColumns,
+      tableData;
 
     try {
       allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
       if (!allSchedules.length) return [];
 
-      formattedSchedules = allSchedules.map((trip, idx) =>
-        <tr key={idx}>
-          <td>
-            {trip.$.fare}
-          </td>
-          <td>
-            {trip.$.origTimeMin} {trip.$.origTimeDate}
-          </td>
-          <td>
-            {trip.$.destTimeMin} {trip.$.destTimeDate}
-          </td>
-        </tr>
+      tableData = allSchedules.map((trip, idx) => ({
+        arriveAt: `${trip.$.destTimeMin} ${trip.$.destTimeDate}`,
+        fare: trip.$.fare,
+        id: idx,
+        leaveAt: `${trip.$.origTimeMin} ${trip.$.origTimeDate}`,
+      }));
+      tableColumns = [
+        {
+          header: {
+            label: 'Fare'
+          },
+          property: 'fare',
+        },
+        {
+          header: {
+            label: 'Arrival'
+          },
+          property: 'arriveAt',
+        },
+        {
+          header: {
+            label: 'Departure'
+          },
+          property: 'leaveAt',
+        },
+      ];
+
+      return (
+        <Table.Provider
+          className='pure-table pure-table-striped'
+          columns={tableColumns}
+        >
+          <Table.Header />
+
+          <Table.Body
+            rowKey='id'
+            rows={tableData}
+          />
+        </Table.Provider>
       );
     } catch (err) {
+      console.log('got err', err);
+
       return [];
     }
-
-    return formattedSchedules;
   }
 
   renderSchedules = () => {
@@ -276,14 +307,7 @@ class Start extends React.Component {
 
     return (
       <div className='schedules'>
-        <table>
-          <tbody>
-            <tr>
-              <th>cost</th><th>leave at</th><th>arrive at</th>
-            </tr>
-            {formattedSchedules}
-          </tbody>
-        </table>
+        {formattedSchedules}
       </div>
     );
   }

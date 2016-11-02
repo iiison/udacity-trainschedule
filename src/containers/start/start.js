@@ -4,11 +4,13 @@ import { connect } from 'react-redux';
 import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
 import * as dom from 'lib/dom.js';
-import Popup from 'react-popup';
-import Stationinfo from 'components/stationinfo/stationinfo.js';
 import * as time from 'lib/time.js';
 import * as math from 'lib/math.js';
+import Stationinfo from 'components/stationinfo/stationinfo.js';
+
 import { Table } from 'reactabular';
+import Popup from 'react-popup';
+import DayPicker from "react-day-picker";
 
 class Start extends React.Component {
   static propTypes = {
@@ -346,6 +348,13 @@ class Start extends React.Component {
   render() {
     return (
       <div className='start'>
+
+        <DayPicker
+          className='birthdays'
+          initialMonth={ new Date(2016, 1) }
+          onDayClick={console.log}
+      />
+      hello!
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors()}
         {this.renderSchedules()}

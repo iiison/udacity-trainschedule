@@ -8,3 +8,7 @@ import Moment from 'moment';
  */
 export const getBartTime = (time) =>
   time && Moment(time.trim()).format('MM/DD/YYYY h:mm+a').trim();
+
+export const getTodaysDate = () => Moment().format("YYYY-MM-DD");
+
+export const getRightNowTime = () => Moment().format("HH:mm");

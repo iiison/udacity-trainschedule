@@ -30,7 +30,7 @@ class Start extends React.Component {
       try {
         const options = nextProps.stations.data.stations[0].station.asMutable();
 
-        // get two random stations
+        // get two random stations' abbreviation
         const
           from = options
             .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0],
@@ -51,6 +51,7 @@ class Start extends React.Component {
         // do nothing
       }
   }
+
   handleSubmit = (e, setTime) => {
     if (!e) return false;
     if(e.preventDefault) e.preventDefault();
@@ -240,8 +241,18 @@ class Start extends React.Component {
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
         <label htmlFor='date'><span>{this.getScheduleConfig('depart') ? 'leave by' : 'arrive by' }</span>
-          <input id='date' type='date' />
-          <input id='time' type='time' />
+          <input
+            defaultValue={time.getTodaysDate()}
+            id='date'
+            required
+            type='date'
+          />
+          <input
+            defaultValue={time.getRightNowTime()}
+            id='time'
+            required
+            type='time'
+          />
         </label>
       </p>
       <datalist id='stations'>

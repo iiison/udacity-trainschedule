@@ -16,6 +16,13 @@ export function appError(data) {
   };
 }
 
+export function gotRandomSchedule(bool) {
+  return {
+    bool,
+    type: 'RANDOM_SCHEDULE',
+  };
+}
+
 export function scheduleConfigDepart() {
   return {
     type: 'SCHEDULE_CONFIG_DEPART',
@@ -38,6 +45,18 @@ export function gotStations({
   data = {},
   status = 'UNKNOWN',
   type = 'GOT_STATIONS',
+}) {
+  return {
+    data,
+    status,
+    type
+  };
+}
+
+export function gotStationInfo({
+  data = {},
+  status = 'UNKNOWN',
+  type = 'GOT_STATION_INFO',
 }) {
   return {
     data,

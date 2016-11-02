@@ -7,17 +7,50 @@ import * as dom from 'lib/dom.js';
 import Popup from 'react-popup';
 import Stationinfo from 'components/stationinfo/stationinfo.js';
 import * as time from 'lib/time.js';
+import * as math from 'lib/math.js';
 import { Table } from 'reactabular';
 
 class Start extends React.Component {
   static propTypes = {
     appError: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.object.isRequired,
+    randomSchedule: React.PropTypes.bool.isRequired,
     scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
   }
 
+  componentDidMount() {
+    // get stations
+    this.props.dispatch.getBart({type: 'stations'});
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.randomSchedule && !nextProps.randomSchedule)
+      try {
+        const options = nextProps.stations.data.stations[0].station.asMutable();
+
+        // get two random stations
+        const
+          from = options
+            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0],
+          to = options
+            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0];
+        const
+          scheduleConfigDepartBool = this.props.scheduleConfig.depart;
+
+        // get random schedule
+        this.props.dispatch.getBart({
+          from,
+          scheduleConfigDepartBool,
+          to,
+          type: 'schedules',
+        });
+        this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
+      } catch (err) {
+        // do nothing
+      }
+  }
   handleSubmit = (e, setTime) => {
     if (!e) return false;
     if(e.preventDefault) e.preventDefault();
@@ -31,7 +64,7 @@ class Start extends React.Component {
       arrive = thisTarget['arrive-station'].value,
       dateTime = time.getBartTime(
         setTime ||
-        thisTarget[scheduleConfigDepartBool ? 'depart-time' : 'arrive-time'].value
+        `${thisTarget.date.value}T${thisTarget.time.value}`
       ),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
@@ -139,9 +172,13 @@ class Start extends React.Component {
       // do nothing
     }
 
-    return abbr &&
-      // Popup.alert(e.currentTarget.innerHTML);
-      Popup.create({
+    if (abbr) {
+      this.props.dispatch.getBart({
+        from: abbr,
+        type: 'stationInfo',
+      });
+
+      return Popup.create({
         buttons: {
           // left: ['cancel'],
           right: [{
@@ -152,8 +189,9 @@ class Start extends React.Component {
         },
         className: 'alert',
         content: <Stationinfo {...stationinfo} /> || 'No information found',
-        title: stationinfo.name && `${stationinfo.name} Station Information` || 'Bart Station Information',
+        title: stationinfo.name ? `${stationinfo.name} Station Information` : 'Bart Station Information',
       });
+    }
   }
 
   getScheduleConfig = (type) => this.props.scheduleConfig[type];
@@ -162,16 +200,7 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    let thisTime;
-    try {
-      thisTime = document.getElementById('arrive-time').value;
-    } catch (err) {
-      try {
-        thisTime = document.getElementById('depart-time').value;
-      } catch (err2) {
-        // do nothing
-      }
-    }
+    const thisTime = `${document.getElementById('date').value}T${document.getElementById('time').value}`;
 
     this.props.dispatch.scheduleConfigDepart();
 
@@ -191,43 +220,30 @@ class Start extends React.Component {
         wildClasses={false}
       />
       <p>
-        <label htmlFor='depart-station'><span>I want to leave </span>
+        <label htmlFor='depart-station'><span>Depart</span>
           <input
             id='depart-station'
             list='stations'
             onChange={this.getStation}
             required
 
-          />&nbsp;
+          />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
-      </p>
-      {this.getScheduleConfig('depart') &&
-        <p>
-          <label htmlFor='depart-time'><span>around </span>
-            <input id='depart-time' type='datetime-local' />
-          </label>
-        </p>
-      }
-      <p>
-        <label htmlFor='arrive-station'><span>and arrive at </span>
+        <label htmlFor='arrive-station'><span>Arrive </span>
           <input
             id='arrive-station'
             list='stations'
             onChange={this.getStation}
             required
-
-          />&nbsp;
+          />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
+        <label htmlFor='date'><span>{this.getScheduleConfig('depart') ? 'leave by' : 'arrive by' }</span>
+          <input id='date' type='date' />
+          <input id='time' type='time' />
+        </label>
       </p>
-      {!this.getScheduleConfig('depart') &&
-        <p>
-          <label htmlFor='arrive-time'><span>by </span>
-            <input id='arrive-time' type='datetime-local' />
-          </label>
-        </p>
-      }
       <datalist id='stations'>
         <select id='stations-select' >{this.getStations()}</select>
       </datalist>
@@ -292,14 +308,12 @@ class Start extends React.Component {
         </Table.Provider>
       );
     } catch (err) {
-      console.log('got err', err);
-
       return [];
     }
   }
 
   renderSchedules = () => {
-    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return '';
+    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return null;
 
     const formattedSchedules = this.getSavedSchedules();
 
@@ -349,8 +363,10 @@ class Start extends React.Component {
 const mapStateToProps = (state) =>
   ({
     appError: state.appError,
+    randomSchedule: state.gotRandomSchedule,
     scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
+    stationDetails: state.gotStationInfo,
     stations: state.gotStations,
   });
 

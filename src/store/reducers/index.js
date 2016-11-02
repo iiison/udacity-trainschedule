@@ -6,6 +6,12 @@ export function msg(state = Immutable({}), action) {
     state;
 }
 
+export function gotRandomSchedule(state = Immutable({}), action) {
+  return action.type === 'RANDOM_SCHEDULE' ?
+    action.bool :
+    state;
+}
+
 export function scheduleConfig(state = Immutable({}), action) {
   return action.type === 'SCHEDULE_CONFIG_DEPART' ?
     Immutable({...state, depart: !state.depart}) : state;
@@ -19,6 +25,16 @@ export function appError(state = Immutable({}), action) {
 
 export function gotStations(state = Immutable({}), action) {
   if (action.type !== 'GOT_STATIONS') return state;
+
+  return Immutable({
+    ...state,
+    data: action.data,
+    status: action.status || 'oops'
+  });
+}
+
+export function gotStationInfo(state = Immutable({}), action) {
+  if (action.type !== 'GOT_STATION_INFO') return state;
 
   return Immutable({
     ...state,

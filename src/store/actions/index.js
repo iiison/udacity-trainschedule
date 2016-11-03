@@ -96,8 +96,6 @@ export function getBart({
       functionName = gotSchedules;
       time = thisTime ? `&time=${thisTime}` : '';
       url = `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${date}${time}&key=${consts.apikey}&b=4&a=4&l=1`;
-
-      console.log('data is', date, time, url);
       break;
     }
     default: return false;

@@ -1,0 +1,87 @@
+@import './variables.css';
+@import './calendar.css';
+@import './time.css';
+@import './slider.css';
+
+.im-btn {
+  display: inline-block;
+  background-color: #ffffff;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  line-height: 1;
+
+  &::before {
+    margin-right: 6px;
+  }
+}
+
+#inputmoment {
+  text-align: center;
+
+  & .m-input-moment {
+    border-radius: 3px;
+    border: 1px solid var(--color-gray);
+    display: block;
+    margin: 0 auto;
+    padding: 12px 15px;
+    width: 80%;
+
+    & .options {
+      width: 100%;
+      display: inline-block;
+      margin-bottom: 4px;
+
+      & button {
+        float: left;
+        width: 50%;
+        color: var(--color-blue);
+        text-align: center;
+        font-size: 16px;
+        padding: 7px;
+        border: 1px solid var(--color-blue);
+        border-radius: 3px;
+
+        &:first-child {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+
+        &:last-child {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+
+        &.is-active {
+          color: #ffffff;
+          background-color: var(--color-blue);
+        }
+      }
+    }
+
+    & .tabs {
+      margin-bottom: 11px;
+
+      & .tab {
+        display: none;
+        height: 310px;
+
+        &.is-active {
+          display: block;
+        }
+      }
+    }
+
+    & .btn-save {
+      display: block;
+      margin-top: 10px;
+      width: 100%;
+      background-color: var(--color-blue);
+      padding: 12px 0;
+      text-align: center;
+      color: #ffffff;
+      font-size: 16px;
+      border-radius: 3px;
+    }
+  }
+}

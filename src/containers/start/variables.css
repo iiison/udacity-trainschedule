@@ -1,0 +1,8 @@
+:root {
+  --color-blue: #1385e5;
+  --color-gray: #dfe0e4;
+  --color-white: #fff;
+  --slider-handle-size: 10px;
+  --slider-size: 10px;
+  --slider-fix: 10px;
+}

@@ -12,3 +12,7 @@ export const getBartTime = (time) =>
 export const getTodaysDate = () => Moment().format("YYYY-MM-DD");
 
 export const getRightNowTime = () => Moment().format("HH:mm");
+
+export const getDateTimeLocalFormat = () => 'YYYY-MM-DDThh:mm';
+
+export const moment = Moment;

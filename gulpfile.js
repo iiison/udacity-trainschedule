@@ -55,10 +55,16 @@ function createBundler(useWatchify, server) {
         extensions: ['.css', '.scss'],
         inject: false,
         plugin:[
+          ['postcss-import', {
+            from: 'src/',
+            path: [
+              'node_modules/ionicons/dist/css',
+              'node_modules/ionicons/dist/fonts',
+            ]
+          }],
           ['postcss-cssnext', {
             browsers: ['last 3 versions']
           }],
-          'postcss-import',
           'postcss-extend',
           [reporter, { clearMessages: true }]
         ]

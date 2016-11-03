@@ -4,11 +4,16 @@ import { connect } from 'react-redux';
 import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
 import * as dom from 'lib/dom.js';
-import Popup from 'react-popup';
-import Stationinfo from 'components/stationinfo/stationinfo.js';
 import * as time from 'lib/time.js';
 import * as math from 'lib/math.js';
+import Stationinfo from 'components/stationinfo/stationinfo.js';
+
 import { Table } from 'reactabular';
+import Popup from 'react-popup';
+// import DayPicker from "react-day-picker";
+// https://github.com/wangzuo/input-moment
+import InputMoment from 'st-input-moment';
+import inputMomentStyles from './inputmoment.css';
 
 class Start extends React.Component {
   static propTypes = {
@@ -18,6 +23,13 @@ class Start extends React.Component {
     scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      m : time.moment()
+    };
   }
 
   componentDidMount() {
@@ -65,7 +77,7 @@ class Start extends React.Component {
       arrive = thisTarget['arrive-station'].value,
       dateTime = time.getBartTime(
         setTime ||
-        `${thisTarget.date.value}T${thisTarget.time.value}`
+        `${thisTarget.date.value}`
       ),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
@@ -201,7 +213,7 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    const thisTime = `${document.getElementById('date').value}T${document.getElementById('time').value}`;
+    const thisTime = `${document.getElementById('date').value}`;
 
     this.props.dispatch.scheduleConfigDepart();
 
@@ -242,19 +254,23 @@ class Start extends React.Component {
         </label>
         <label htmlFor='date'><span>{this.getScheduleConfig('depart') ? 'leave by' : 'arrive by' }</span>
           <input
-            defaultValue={time.getTodaysDate()}
             id='date'
+            onClick={this.handleClockShow}
+            readOnly
             required
-            type='date'
-          />
-          <input
-            defaultValue={time.getRightNowTime()}
-            id='time'
-            required
-            type='time'
+            type='datetime-local'
+            value={this.state.m.format(time.getDateTimeLocalFormat())}
           />
         </label>
       </p>
+      <section id ='inputmoment'>
+        <style scoped type='text/css'>{inputMomentStyles}</style>
+        <InputMoment
+          moment={this.state.m}
+          onChange={this.handleClockChange}
+          onSave={this.handleClockSave}
+        />
+      </section>
       <datalist id='stations'>
         <select id='stations-select' >{this.getStations()}</select>
       </datalist>
@@ -311,7 +327,6 @@ class Start extends React.Component {
           columns={tableColumns}
         >
           <Table.Header />
-
           <Table.Body
             rowKey='id'
             rows={tableData}
@@ -341,6 +356,18 @@ class Start extends React.Component {
     const error = this.props.appError.msg;
 
     return error ? <h1>{this.props.appError.msg}</h1> : '';
+  }
+
+  handleClockChange = (m) => {
+    this.setState({m: m});
+  }
+
+  handleClockSave = () => {
+    document.getElementsByClassName("m-input-moment")[0].style.display = 'none';
+  }
+
+  handleClockShow = () => {
+    document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
   }
 
   render() {

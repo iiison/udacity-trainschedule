@@ -239,7 +239,6 @@ class Start extends React.Component {
             list='stations'
             onChange={this.getStation}
             required
-
           />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
@@ -280,45 +279,24 @@ class Start extends React.Component {
   /**
    * returns renderable list
    * @method getSavedSchedules
+   * @param {Array} allSchedules this.props.schedules.data.schedule[0].request[0].trip
    * @return {HTMLElement|null}          [description]
    */
-  getSavedSchedules = () => {
-    if (this.props.appError.msg) return [];
-
-    let
-      allSchedules,
-      tableColumns,
-      tableData;
+  getSavedSchedules = (allSchedules) => {
+    if (!Array.isArray(allSchedules) || !allSchedules.length) return null;
 
     try {
-      allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
-      if (!allSchedules.length) return [];
-
-      tableData = allSchedules.map((trip, idx) => ({
+      const tableData = allSchedules.map((trip, idx) => ({
         arriveAt: `${trip.$.destTimeMin} ${trip.$.destTimeDate}`,
         fare: trip.$.fare,
         id: idx,
         leaveAt: `${trip.$.origTimeMin} ${trip.$.origTimeDate}`,
       }));
-      tableColumns = [
-        {
-          header: {
-            label: 'Fare'
-          },
-          property: 'fare',
-        },
-        {
-          header: {
-            label: 'Arrival'
-          },
-          property: 'arriveAt',
-        },
-        {
-          header: {
-            label: 'Departure'
-          },
-          property: 'leaveAt',
-        },
+
+      const tableColumns = [
+        { header: { label: 'Fare' }, property: 'fare' },
+        { header: { label: 'Arrival' }, property: 'arriveAt' },
+        { header: { label: 'Departure' }, property: 'leaveAt' },
       ];
 
       return (
@@ -334,58 +312,57 @@ class Start extends React.Component {
         </Table.Provider>
       );
     } catch (err) {
-      return [];
+      return null;
     }
   }
 
-  renderSchedules = () => {
-    if (this.props.schedules.status !== 'SUCCESS' || this.props.appError.msg) return null;
+  renderSchedules = (status, errMsg, allSchedules) => {
+    if (status !== 'SUCCESS' || errMsg) return null;
 
-    const formattedSchedules = this.getSavedSchedules();
+    const formattedSchedules = this.getSavedSchedules(allSchedules);
 
-    if (Array.isArray(formattedSchedules) && !formattedSchedules.length) return null;
-
-    return (
+    return formattedSchedules ?
       <div className='schedules'>
         {formattedSchedules}
-      </div>
-    );
+      </div> :
+      null;
   }
 
-  renderErrors() {
-    const error = this.props.appError.msg;
+  renderErrors = (e) => e ? <h1>{e}</h1> : null;
 
-    return error ? <h1>{this.props.appError.msg}</h1> : '';
-  }
-
-  handleClockChange = (m) => {
+  handleClockChange = (m) =>
     this.setState({m: m});
-  }
 
-  handleClockSave = () => {
+  handleClockSave = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'none';
-  }
 
-  handleClockShow = () => {
+  handleClockShow = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
-  }
 
   render() {
+    let status, errMsg, allSchedules;
+    try {
+      status = this.props.schedules.status,
+      errMsg = this.props.appError.msg,
+      allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
+      console.log(allSchedules);
+    } catch (err) {
+      // do nothing
+    }
+
     return (
       <div className='start'>
         <style scoped type='text/css'>{styles}</style>
-        {this.renderErrors()}
-        {this.renderSchedules()}
+        {this.renderErrors(errMsg)}
+        {this.renderSchedules(status, errMsg, allSchedules)}
         <section id='start-forms'>
           <form id='station-form' onSubmit={this.getStations}>
             <input
-
               type='submit'
-              value='Get Stations'
+              value='Update Stations'
             />&nbsp;
             <button
               onClick={this.switchScheduleConfig}
-
             >Type: {this.props.scheduleConfig.depart ? 'Departing' : 'Arriving'}</button>
           </form>
           {

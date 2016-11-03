@@ -1,0 +1,39 @@
+@import 'variables';
+
+.u-slider-time {
+  position: relative;
+  display: inline-block;
+  background-color: var(--color-gray);
+  border-radius: 3px;
+  height: var(--slider-size);
+  width: 100%;
+  cursor: pointer;
+
+  & .value {
+    position: absolute;
+    background-color: var(--color-blue);
+    border-radius: 3px;
+    top: 0;
+    height: 100%;
+  }
+
+  & .handle {
+    position: absolute;
+    width: var(--slider-size);
+    height: var(--slider-size);
+
+    &::after {
+      position: relative;
+      display: block;
+      content: '';
+      top: -calc(var(--slider-fix) / 2);
+      left: -calc((var(--slider-size) + var(--slider-fix)) / 2);
+      width: calc(var(--slider-size) + var(--slider-fix));
+      height: calc(var(--slider-size) + var(--slider-fix));
+      background-color: #fff;
+      border: 3px solid var(--color-blue);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  }
+}

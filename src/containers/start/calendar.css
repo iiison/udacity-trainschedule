@@ -1,0 +1,85 @@
+@import 'variables';
+
+.m-calendar {
+  display: inline-block;
+
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: fixed;
+  }
+
+  & td {
+    padding: 8px 0;
+    text-align: center;
+    cursor: pointer;
+    color: var(--color-gray);
+    border: 1px solid var(--color-gray);
+  }
+
+  & thead {
+    & td {
+      color: var(--color-blue);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+  }
+
+  & tbody td {
+    color: #666666;
+
+    &:hover {
+      background: var(--color-blue);
+      border-color: var(--color-blue);
+      color: var(--color-white);
+    }
+  }
+
+  & .current-day {
+    color: var(--color-blue);
+    font-weight: bold;
+  }
+
+  & .prev-month,
+  & .next-month {
+    color: #999999;
+  }
+
+  & .toolbar {
+    line-height: 30px;
+    color: var(--color-blue);
+    text-align: center;
+    margin-bottom: 13px;
+
+    & button {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      color: #ffffff;
+      border: 1px solid var(--color-blue);
+      border-radius: 50%;
+      background: var(--color-blue);
+      font-size: 20px;
+      padding: 0;
+      text-align: center;
+      outline: 0;
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    & .prev-month {
+      float: left;
+    }
+
+    & .next-month {
+      float: right;
+    }
+
+    & .current-date {
+      color: var(--color-blue);
+    }
+  }
+}

@@ -64,7 +64,7 @@ class Start extends React.Component {
       }
   }
 
-  handleSubmit = (e, setTime) => {
+  handleSubmit = (e) => {
     if (!e) return false;
     if(e.preventDefault) e.preventDefault();
     if(e.stopPropagation) e.stopPropagation();
@@ -76,8 +76,7 @@ class Start extends React.Component {
     const
       arrive = thisTarget['arrive-station'].value,
       dateTime = time.getBartTime(
-        setTime ||
-        `${thisTarget.date.value}`
+        `${this.state.m.format(time.getTodaysDate())}T${this.state.m.format(time.getRightNowTime())}`
       ),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
@@ -213,12 +212,10 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    const thisTime = `${document.getElementById('date').value}`;
-
     this.props.dispatch.scheduleConfigDepart();
 
     return document.getElementsByClassName('more-info sike').length === 0 ?
-      this.handleSubmit(document.getElementById('schedule-form'), thisTime) : false;
+      this.handleSubmit(document.getElementById('schedule-form')) : false;
   }
 
   makeScheduleForm = () =>
@@ -233,7 +230,8 @@ class Start extends React.Component {
         wildClasses={false}
       />
       <p>
-        <label htmlFor='depart-station'><span>Depart</span>
+        <label htmlFor='depart-station'>
+          <span>Depart</span>
           <input
             id='depart-station'
             list='stations'
@@ -242,7 +240,8 @@ class Start extends React.Component {
           />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
-        <label htmlFor='arrive-station'><span>Arrive </span>
+        <label htmlFor='arrive-station'>
+          <span>Arrive</span>
           <input
             id='arrive-station'
             list='stations'
@@ -251,14 +250,26 @@ class Start extends React.Component {
           />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
-        <label htmlFor='date'><span>{this.getScheduleConfig('depart') ? 'leave by' : 'arrive by' }</span>
+        <label htmlFor='date'>
+          <span>Date</span>
           <input
             id='date'
-            onClick={this.handleClockShow}
+            onClick={this.handleClockShowDate}
             readOnly
             required
-            type='datetime-local'
-            value={this.state.m.format(time.getDateTimeLocalFormat())}
+            type='date'
+            value={this.state.m.format(time.getDateFormat())}
+          />
+        </label>
+        <label htmlFor='time'>
+          <span>Time</span>
+          <input
+            id='time'
+            onClick={this.handleClockShowTime}
+            readOnly
+            required
+            type='time'
+            value={this.state.m.format(time.getTimeFormat())}
           />
         </label>
       </p>
@@ -336,16 +347,21 @@ class Start extends React.Component {
   handleClockSave = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'none';
 
-  handleClockShow = () =>
+  handleClockShowDate = () =>
+    document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
+
+  handleClockShowTime = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
 
   render() {
-    let status, errMsg, allSchedules;
+    let
+      allSchedules,
+      errMsg,
+      status;
     try {
       status = this.props.schedules.status,
       errMsg = this.props.appError.msg,
       allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
-      console.log(allSchedules);
     } catch (err) {
       // do nothing
     }
@@ -354,7 +370,6 @@ class Start extends React.Component {
       <div className='start'>
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors(errMsg)}
-        {this.renderSchedules(status, errMsg, allSchedules)}
         <section id='start-forms'>
           <form id='station-form' onSubmit={this.getStations}>
             <input
@@ -369,6 +384,9 @@ class Start extends React.Component {
             this.props.stations.status === 'SUCCESS' &&
             this.makeScheduleForm()
           }
+        </section>
+        <section>
+          {this.renderSchedules(status, errMsg, allSchedules)}
         </section>
       </div>
     );

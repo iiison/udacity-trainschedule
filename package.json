@@ -13,6 +13,7 @@
     "prestart": "npm run eslint-fix",
     "start": "./node_modules/.bin/gulp",
     "prod": "NODE_ENV=production ./node_modules/.bin/gulp prod && node dist/server.js",
+    "build": "NODE_ENV=production ./node_modules/.bin/gulp prod",
     "test": "./node_modules/.bin/gulp test",
     "eslint": "./node_modules/.bin/gulp eslint",
     "eslint-unused": "./node_modules/.bin/eslint-find-rules -u ./.eslintrc -n",

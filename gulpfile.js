@@ -227,18 +227,21 @@ gulp.task('copy:service-workers', (done) =>
   }));
 
 gulp.task("default", gulpSequence(
-    'stylelint',
-    'eslint',
-    'test',
-    'copy:server-certs',
-    'copy:service-workers',
-    "watch:server",
-    "watch:client"
+  'stylelint',
+  'eslint',
+  'test',
+  'copy:server-certs',
+  'copy:service-workers',
+  "watch:server",
+  "watch:client"
 ));
 
 gulp.task("prod", gulpSequence(
-    'copy:server-certs',
-    'copy:service-workers',
-    'bundle:server',
-    'bundle:client'
+  'stylelint',
+  'eslint',
+  'test',
+  'copy:server-certs',
+  'copy:service-workers',
+  'bundle:server',
+  'bundle:client'
 ));

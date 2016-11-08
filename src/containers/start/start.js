@@ -28,7 +28,9 @@ class Start extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      m : time.moment()
+      from: [],
+      m : time.moment(),
+      to: [],
     };
   }
 
@@ -45,26 +47,35 @@ class Start extends React.Component {
         // get two random stations' abbreviation
         const
           from = options
-            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0],
+            .splice(math.getRandomInt(0, options.length), 1),
           to = options
-            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0];
+            .splice(math.getRandomInt(0, options.length), 1);
         const
           scheduleConfigDepartBool = this.props.scheduleConfig.depart;
 
+        const
+          fromAbbr = from[0].abbr[0],
+          toAbbr = to[0].abbr[0];
+
         // get random schedule
         this.props.dispatch.getBart({
-          from,
+          from: fromAbbr,
           scheduleConfigDepartBool,
-          to,
+          to: toAbbr,
           type: 'schedules',
         });
         this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
+
+        this.setState({
+          from: [...this.state.from, from],
+          to: [...this.state.to, to],
+        });
       } catch (err) {
         // do nothing
       }
   }
 
-  handleSubmit = (e, setTime) => {
+  handleSubmit = (e) => {
     if (!e) return false;
     if(e.preventDefault) e.preventDefault();
     if(e.stopPropagation) e.stopPropagation();
@@ -76,17 +87,23 @@ class Start extends React.Component {
     const
       arrive = thisTarget['arrive-station'].value,
       dateTime = time.getBartTime(
-        setTime ||
-        `${thisTarget.date.value}`
+        `${this.state.m.format(time.getTodaysDate())}T${this.state.m.format(time.getRightNowTime())}`
       ),
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
 
-    let from, to;
+    let
+      from,
+      fromAbbr,
+      to,
+      toAbbr;
 
     try {
-      to = Array.from(options).find((opt) => opt.value === arrive).dataset.abbr;
-      from = Array.from(options).find((opt) => opt.value === depart).dataset.abbr;
+      to = Array.from(options).find((opt) => opt.value === arrive);
+      from = Array.from(options).find((opt) => opt.value === depart);
+
+      fromAbbr = from.dataset.abbr;
+      toAbbr = to.dataset.abbr;
     } catch (err) {
       return this.props.dispatch.appError('The selected stations do not exist');
     }
@@ -96,11 +113,11 @@ class Start extends React.Component {
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
     return from && to ? this.props.dispatch.getBart({
-      from,
+      from: fromAbbr,
       scheduleConfigDepartBool,
       thisDate,
       thisTime,
-      to,
+      to: toAbbr,
       type: 'schedules',
     }) : undefined;
   }
@@ -213,12 +230,10 @@ class Start extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    const thisTime = `${document.getElementById('date').value}`;
-
     this.props.dispatch.scheduleConfigDepart();
 
     return document.getElementsByClassName('more-info sike').length === 0 ?
-      this.handleSubmit(document.getElementById('schedule-form'), thisTime) : false;
+      this.handleSubmit(document.getElementById('schedule-form')) : false;
   }
 
   makeScheduleForm = () =>
@@ -233,7 +248,8 @@ class Start extends React.Component {
         wildClasses={false}
       />
       <p>
-        <label htmlFor='depart-station'><span>Depart</span>
+        <label htmlFor='depart-station'>
+          <span>Depart</span>
           <input
             id='depart-station'
             list='stations'
@@ -242,7 +258,8 @@ class Start extends React.Component {
           />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
-        <label htmlFor='arrive-station'><span>Arrive </span>
+        <label htmlFor='arrive-station'>
+          <span>Arrive</span>
           <input
             id='arrive-station'
             list='stations'
@@ -251,14 +268,26 @@ class Start extends React.Component {
           />
           <button className='more-info sike' onClick={this.getMoreInfo} />
         </label>
-        <label htmlFor='date'><span>{this.getScheduleConfig('depart') ? 'leave by' : 'arrive by' }</span>
+        <label htmlFor='date'>
+          <span>Date</span>
           <input
             id='date'
-            onClick={this.handleClockShow}
+            onClick={this.handleClockShowDate}
             readOnly
             required
-            type='datetime-local'
-            value={this.state.m.format(time.getDateTimeLocalFormat())}
+            type='date'
+            value={this.state.m.format(time.getDateFormat())}
+          />
+        </label>
+        <label htmlFor='time'>
+          <span>Time</span>
+          <input
+            id='time'
+            onClick={this.handleClockShowTime}
+            readOnly
+            required
+            type='time'
+            value={this.state.m.format(time.getTimeFormat())}
           />
         </label>
       </p>
@@ -288,21 +317,26 @@ class Start extends React.Component {
     try {
       const tableData = allSchedules.map((trip, idx) => ({
         arriveAt: `${trip.$.destTimeMin} ${trip.$.destTimeDate}`,
-        fare: trip.$.fare,
         id: idx,
         leaveAt: `${trip.$.origTimeMin} ${trip.$.origTimeDate}`,
       }));
 
       const tableColumns = [
-        { header: { label: 'Fare' }, property: 'fare' },
         { header: { label: 'Arrival' }, property: 'arriveAt' },
         { header: { label: 'Departure' }, property: 'leaveAt' },
       ];
 
-      return (
+      return [
+        <section
+          className='fare'
+          key='01'
+        >
+          <sup>$</sup>{allSchedules[0].$.fare}
+        </section>,
         <Table.Provider
-          className='pure-table pure-table-striped'
+          className='striped'
           columns={tableColumns}
+          key='02'
         >
           <Table.Header />
           <Table.Body
@@ -310,7 +344,7 @@ class Start extends React.Component {
             rows={tableData}
           />
         </Table.Provider>
-      );
+      ];
     } catch (err) {
       return null;
     }
@@ -336,16 +370,21 @@ class Start extends React.Component {
   handleClockSave = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'none';
 
-  handleClockShow = () =>
+  handleClockShowDate = () =>
+    document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
+
+  handleClockShowTime = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
 
   render() {
-    let status, errMsg, allSchedules;
+    let
+      allSchedules,
+      errMsg,
+      status;
     try {
       status = this.props.schedules.status,
       errMsg = this.props.appError.msg,
       allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
-      console.log(allSchedules);
     } catch (err) {
       // do nothing
     }
@@ -354,7 +393,6 @@ class Start extends React.Component {
       <div className='start'>
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors(errMsg)}
-        {this.renderSchedules(status, errMsg, allSchedules)}
         <section id='start-forms'>
           <form id='station-form' onSubmit={this.getStations}>
             <input
@@ -369,6 +407,9 @@ class Start extends React.Component {
             this.props.stations.status === 'SUCCESS' &&
             this.makeScheduleForm()
           }
+        </section>
+        <section>
+          {this.renderSchedules(status, errMsg, allSchedules)}
         </section>
       </div>
     );

@@ -50,7 +50,8 @@ function renderFullPage(html, preloadedState) {
         <script>
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
         </script>
-        <script src="/js/bundle.js"></script>
+        <script src='/js/bundle.js' type='text/javascript'></script>
+        <script src='/registration.js' type='text/javascript'></script>
       </body>
     </html>
     `;
@@ -59,6 +60,33 @@ function renderFullPage(html, preloadedState) {
 const app = express();
 app.use(helmet());
 app.use(express.static(`${__dirname}/public`));
+
+const serviceWorkerFileOptions = {
+  dotfiles: 'deny',
+  headers: {
+    'x-sent': true,
+    'x-timestamp': Date.now(),
+  },
+  root: __dirname
+};
+
+app.get('/registration.js', (req, res) => {
+  res.sendFile('./registration.js', serviceWorkerFileOptions, (err) => {
+    if (err) {
+      console.log(err);
+      res.status(err.status).end();
+    } else console.log('Sent:', 'registration.js');
+  });
+});
+
+app.get('/rootworker.js', (req, res) => {
+  res.sendFile('./rootworker.js', serviceWorkerFileOptions, (err) => {
+    if (err) {
+      console.log(err);
+      res.status(err.status).end();
+    } else console.log('Sent:', 'rootworker.js');
+  });
+});
 
 app.get("*", (req, res) => {
   const location = createLocation(req.url);

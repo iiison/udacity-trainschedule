@@ -2,7 +2,7 @@
 //import { shallow, mount, render } from 'enzyme';
 import notfound from './notfound.js';
 
-describe("FILE: src/containers/notfound.js", () => {
+describe(`FILE: ${__dirname}`, () => {
   it("is okay", () => {
     expect(notfound).to.be.ok;
   });

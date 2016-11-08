@@ -51,7 +51,7 @@ function renderFullPage(html, preloadedState) {
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
         </script>
         <script src='/js/bundle.js' type='text/javascript'></script>
-        <script src='/registration.js' type='text/javascript'></script>
+        <script src='/container.js' type='text/javascript'></script>
       </body>
     </html>
     `;
@@ -70,12 +70,12 @@ const serviceWorkerFileOptions = {
   root: __dirname
 };
 
-app.get('/registration.js', (req, res) => {
-  res.sendFile('./registration.js', serviceWorkerFileOptions, (err) => {
+app.get('/container.js', (req, res) => {
+  res.sendFile('./container.js', serviceWorkerFileOptions, (err) => {
     if (err) {
       console.log(err);
       res.status(err.status).end();
-    } else console.log('Sent:', 'registration.js');
+    } else console.log('Sent: container.js');
   });
 });
 
@@ -84,7 +84,7 @@ app.get('/rootworker.js', (req, res) => {
     if (err) {
       console.log(err);
       res.status(err.status).end();
-    } else console.log('Sent:', 'rootworker.js');
+    } else console.log('Sent: rootworker.js');
   });
 });
 

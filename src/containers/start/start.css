@@ -1,7 +1,7 @@
 :root {
   --prim-col-one: #f2f2f2;
   --prim-col-two: #f0dccb;
-  --prim-col-three: #dbd6f0;
+  --prim-col-three: #f2f2f2;
 }
 
 .start {
@@ -83,5 +83,28 @@
     padding: 10px;
     background-color: var(--prim-col-three);
     word-wrap: 'break-word';
+  }
+
+  & section.fare {
+    font-size: 40px;
+    text-align: center;
+
+    & sup {
+      font-size: 20px;
+    }
+  }
+
+  & table.striped {
+    margin: 0 auto;
+
+    & tr:nth-child(even) {
+      background: var(--prim-col-two);
+    }
+
+    & tr {
+      & td {
+        padding: 5px;
+      }
+    }
   }
 }

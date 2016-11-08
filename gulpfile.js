@@ -7,17 +7,20 @@ const
   // <----- convert from streaming to buffered vinyl file object
   buffer = require("vinyl-buffer"),
   envify = require("loose-envify"),
+  es = require('event-stream'),
   eslint = require('gulp-eslint'),
+  glob = require('glob'),
   gstylelint = require('gulp-stylelint'),
   gulp = require("gulp"),
   gulpCopy = require('gulp-copy'),
-  gulpSequence = require('gulp-sequence'),
   gulpif = require('gulp-if'),
+  gulpSequence = require('gulp-sequence'),
   gutil = require("gulp-util"),
   lrload = require("livereactload"),
   mocha = require('gulp-spawn-mocha'),
   nodemon = require("gulp-nodemon"),
   postCss = require('browserify-postcss'),
+  rename = require('gulp-rename'),
   reporter = require('postcss-reporter'),
   source = require("vinyl-source-stream"),
   sourcemaps = require('gulp-sourcemaps'),
@@ -179,11 +182,11 @@ gulp.task('stylelint', () =>
   .pipe(gstylelint({
     debug: !isProd,
     failAfterError: true,
-    reportOutputDir: 'coverage/lint',
     reporters: [
       {console: true, formatter: 'verbose'},
       {formatter: 'json', save: 'report.json'}
-    ]
+    ],
+    reportOutputDir: 'coverage/lint',
   }))
 );
 
@@ -193,17 +196,49 @@ gulp.task('copy:server-certs', () =>
     .pipe(gulpCopy('./dist/server', { prefix: 2 }))
 );
 
+gulp.task('copy:service-workers', (done) =>
+  glob('./src/lib/serviceworkers/*.js', (err, files) => {
+    if(err) done(err);
+
+    const tasks = files.map((entry) =>
+      browserify({
+        browserField: true,
+        builtins: true,
+        cache: {},
+        commondir: true,
+        detectGlobals: true,
+        entries: [entry],
+        fullPaths: isProd,
+        packageCache: {},
+        transform: [
+          [babelify, {}],
+          [envify, {}]
+        ]
+      })
+        .bundle()
+        .on("error", gutil.log)
+        .pipe(source(entry))
+        .pipe(buffer())
+        .pipe(gulpif(isProd, uglify()))
+        .pipe(rename({ dirname: '' }))
+        .pipe(gulp.dest('./dist'))
+    );
+    es.merge(tasks).on('end', done);
+  }));
+
 gulp.task("default", gulpSequence(
     'stylelint',
     'eslint',
     'test',
     'copy:server-certs',
+    'copy:service-workers',
     "watch:server",
     "watch:client"
 ));
 
 gulp.task("prod", gulpSequence(
     'copy:server-certs',
+    'copy:service-workers',
     'bundle:server',
     'bundle:client'
 ));

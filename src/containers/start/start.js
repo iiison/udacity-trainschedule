@@ -28,7 +28,9 @@ class Start extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      m : time.moment()
+      from: [],
+      m : time.moment(),
+      to: [],
     };
   }
 
@@ -45,20 +47,29 @@ class Start extends React.Component {
         // get two random stations' abbreviation
         const
           from = options
-            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0],
+            .splice(math.getRandomInt(0, options.length), 1),
           to = options
-            .splice(math.getRandomInt(0, options.length), 1)[0].abbr[0];
+            .splice(math.getRandomInt(0, options.length), 1);
         const
           scheduleConfigDepartBool = this.props.scheduleConfig.depart;
 
+        const
+          fromAbbr = from[0].abbr[0],
+          toAbbr = to[0].abbr[0];
+
         // get random schedule
         this.props.dispatch.getBart({
-          from,
+          from: fromAbbr,
           scheduleConfigDepartBool,
-          to,
+          to: toAbbr,
           type: 'schedules',
         });
         this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
+
+        this.setState({
+          from: [...this.state.from, from],
+          to: [...this.state.to, to],
+        });
       } catch (err) {
         // do nothing
       }
@@ -81,11 +92,18 @@ class Start extends React.Component {
       depart = thisTarget['depart-station'].value,
       options = thisTarget['stations-select'].options;
 
-    let from, to;
+    let
+      from,
+      fromAbbr,
+      to,
+      toAbbr;
 
     try {
-      to = Array.from(options).find((opt) => opt.value === arrive).dataset.abbr;
-      from = Array.from(options).find((opt) => opt.value === depart).dataset.abbr;
+      to = Array.from(options).find((opt) => opt.value === arrive);
+      from = Array.from(options).find((opt) => opt.value === depart);
+
+      fromAbbr = from.dataset.abbr;
+      toAbbr = to.dataset.abbr;
     } catch (err) {
       return this.props.dispatch.appError('The selected stations do not exist');
     }
@@ -95,11 +113,11 @@ class Start extends React.Component {
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
     return from && to ? this.props.dispatch.getBart({
-      from,
+      from: fromAbbr,
       scheduleConfigDepartBool,
       thisDate,
       thisTime,
-      to,
+      to: toAbbr,
       type: 'schedules',
     }) : undefined;
   }
@@ -299,21 +317,26 @@ class Start extends React.Component {
     try {
       const tableData = allSchedules.map((trip, idx) => ({
         arriveAt: `${trip.$.destTimeMin} ${trip.$.destTimeDate}`,
-        fare: trip.$.fare,
         id: idx,
         leaveAt: `${trip.$.origTimeMin} ${trip.$.origTimeDate}`,
       }));
 
       const tableColumns = [
-        { header: { label: 'Fare' }, property: 'fare' },
         { header: { label: 'Arrival' }, property: 'arriveAt' },
         { header: { label: 'Departure' }, property: 'leaveAt' },
       ];
 
-      return (
+      return [
+        <section
+          className='fare'
+          key='01'
+        >
+          <sup>$</sup>{allSchedules[0].$.fare}
+        </section>,
         <Table.Provider
-          className='pure-table pure-table-striped'
+          className='striped'
           columns={tableColumns}
+          key='02'
         >
           <Table.Header />
           <Table.Body
@@ -321,7 +344,7 @@ class Start extends React.Component {
             rows={tableData}
           />
         </Table.Provider>
-      );
+      ];
     } catch (err) {
       return null;
     }

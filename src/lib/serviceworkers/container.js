@@ -9,14 +9,15 @@ if ('serviceWorker' in navigator) {
     // scope
     scope: './'
   }).then((reg) => {
-    console.log(`Controller! ${reg}`);
+    console.log(`Controller registered! ${JSON.stringify(reg)}`);
     if (reg.installing) {
       const sw = reg.installing;
       sw.postMessage(`installed worker message`);
-      console.log(`state is installing ${sw}`);
+      console.log(`state is installing ${JSON.stringify(sw)}`);
     } else if (reg.waiting) {
       const sw = reg.waiting;
-      console.log(`state is waiting ${sw}`);
+      console.log(`state is waiting ${JSON.stringify(sw)},`);
+
     }
 
     // reg.installing is now the current worker
@@ -24,7 +25,7 @@ if ('serviceWorker' in navigator) {
       // whenever sw.state changes
       reg.installing.addEventListener('statechange', () => {
         if (reg.state === 'installed')
-          console.log(`please refresh your browser! ${reg}`);
+          console.log(`please refresh your browser! ${JSON.stringify(reg)}`);
       });
     });
   // registration failed

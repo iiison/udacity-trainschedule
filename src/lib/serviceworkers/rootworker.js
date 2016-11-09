@@ -13,6 +13,6 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  console.log(`fetch event: ${event}`);
+  console.log(`fetch event5: ${JSON.stringify(event)}`);
   // put all your caching logic in here
 });

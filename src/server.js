@@ -1,4 +1,3 @@
-/* @flow weak */
 /* eslint-disable no-console */
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
@@ -131,7 +130,6 @@ app.get("*", (req, res) => {
   return true;
 });
 
-// app.listen(3000);
 spdy.createServer(options, app)
   .listen(port, (error) => { // eslint-disable-line consistent-return
     if (error) {

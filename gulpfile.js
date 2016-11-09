@@ -140,8 +140,8 @@ gulp.task("watch:server", () =>
     ext: "js",
     ignore: ["gulpfile.js", "node_modules/*"],
     script: "dist/server.js",
-    tasks: ['bundle:server'],
-    watch: ['src/server.js', 'dist/public/js/bundle.js']
+    tasks: ['copy:service-workers', 'bundle:server'],
+    watch: ['src/server.js', 'dist/public/js/bundle.js', 'src/lib/serviceworkers']
   })
   .on("error", gutil.log)
   .on("change", gutil.log)
@@ -231,7 +231,6 @@ gulp.task("default", gulpSequence(
   'eslint',
   'test',
   'copy:server-certs',
-  'copy:service-workers',
   "watch:server",
   "watch:client"
 ));

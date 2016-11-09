@@ -1,3 +1,4 @@
+/* @flow weak */
 /* eslint-disable no-console */
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';

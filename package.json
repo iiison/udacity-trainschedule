@@ -12,7 +12,9 @@
   "scripts": {
     "prestart": "npm run eslint-fix",
     "start": "./node_modules/.bin/gulp",
+    "preprod": "npm run eslint-fix",
     "prod": "NODE_ENV=production ./node_modules/.bin/gulp prod && node dist/server.js",
+    "prebuild": "npm run eslint-fix",
     "build": "NODE_ENV=production ./node_modules/.bin/gulp prod",
     "test": "./node_modules/.bin/gulp test",
     "eslint": "./node_modules/.bin/gulp eslint",
@@ -68,6 +70,7 @@
     "eslint-plugin-jsx-a11y": "^2.2.2",
     "eslint-plugin-react": "^6.2.0",
     "event-stream": "^3.3.4",
+    "flow-bin": "^0.34.0",
     "glob": "^7.1.1",
     "gulp": "^3.9.1",
     "gulp-copy": "0.0.2",

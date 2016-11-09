@@ -16,6 +16,7 @@
     "prod": "NODE_ENV=production ./node_modules/.bin/gulp prod && node dist/server.js",
     "prebuild": "npm run eslint-fix",
     "build": "NODE_ENV=production ./node_modules/.bin/gulp prod",
+    "flow": "./node_modules/.bin/flow; test $? -eq 0 -o $? -eq 2",
     "test": "./node_modules/.bin/gulp test",
     "eslint": "./node_modules/.bin/gulp eslint",
     "eslint-unused": "./node_modules/.bin/eslint-find-rules -u ./.eslintrc -n",

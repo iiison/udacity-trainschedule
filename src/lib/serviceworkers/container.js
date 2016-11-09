@@ -17,7 +17,6 @@ if ('serviceWorker' in navigator) {
     } else if (reg.waiting) {
       const sw = reg.waiting;
       console.log(`state is waiting ${JSON.stringify(sw)},`);
-
     }
 
     // reg.installing is now the current worker

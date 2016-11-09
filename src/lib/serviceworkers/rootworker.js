@@ -33,6 +33,11 @@ self.addEventListener('fetch', (event) => {
             })
           );
       })
+      .catch(() => {
+        new Response('<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee</p>', {
+          headers: { 'Content-Type': 'text/html' }
+        });
+      })
   );
 });
 

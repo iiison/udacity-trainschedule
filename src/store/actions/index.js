@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { parseString } from 'xml2js';
-import consts from 'constants.js';
+import * as consts from 'constants.js';
 
 export function updateMsg(text) {
   return {
@@ -30,14 +30,16 @@ export function scheduleConfigDepart() {
 }
 
 export function gotSchedules({
-  data = {},
+  data = new Map(),
   status = 'UNKNOWN',
   type = 'GOT_SCHEDULES',
+  url = '',
 }) {
   return {
     data,
     status,
-    type
+    type,
+    url,
   };
 }
 
@@ -95,7 +97,9 @@ export function getBart({
       date = `&date=${thisDate || 'now'}`,
       functionName = gotSchedules;
       time = thisTime ? `&time=${thisTime}` : '';
-      url = `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${date}${time}&key=${consts.apikey}&b=4&a=4&l=1`;
+      url = consts.scheduleUrl({cmd, date, from, time, to});
+
+      console.log(`get bart data, cmd: ${cmd}, date: ${date}, type: ${type}, time: ${time}, url: ${url}`);
       break;
     }
     default: return false;
@@ -122,6 +126,7 @@ export function getBart({
         return dispatch(functionName({
           data: result.root || err2,
           status: 'SUCCESS',
+          url,
         }));
       }
     }))

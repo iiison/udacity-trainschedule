@@ -231,6 +231,7 @@ gulp.task("default", gulpSequence(
   'eslint',
   'test',
   'copy:server-certs',
+  //'copy:service-workers',
   "watch:server",
   "watch:client"
 ));
@@ -240,7 +241,12 @@ gulp.task("prod", gulpSequence(
   'eslint',
   'test',
   'copy:server-certs',
-  'copy:service-workers',
+  //'copy:service-workers',
   'bundle:server',
   'bundle:client'
+));
+
+gulp.task('lint', gulpSequence(
+  'stylelint',
+  'eslint'
 ));

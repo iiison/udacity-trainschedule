@@ -420,6 +420,7 @@ const mapStateToProps = (state) =>
   ({
     appError: state.appError,
     randomSchedule: state.gotRandomSchedule,
+    savedSchedules: state.savedSchedules,
     scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
     stationDetails: state.gotStationInfo,

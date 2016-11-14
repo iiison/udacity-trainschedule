@@ -51,7 +51,7 @@ function renderFullPage(html, preloadedState) {
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
         </script>
         <script src='/js/bundle.js' type='text/javascript'></script>
-        <script src='/container.js' type='text/javascript'></script>
+        <!--<script src='/container.js' type='text/javascript'></script>-->
       </body>
     </html>
     `;
@@ -102,7 +102,8 @@ app.get("*", (req, res) => {
       appError: { msg: '' },
       gotRandomSchedule: false,
       gotSchedules: {
-        status: ''
+        data: new Map(),
+        status: '',
       },
       gotStationInfo: {
         status: ''

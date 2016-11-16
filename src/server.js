@@ -102,7 +102,7 @@ app.get("*", (req, res) => {
       appError: { msg: '' },
       gotRandomSchedule: false,
       gotSchedules: {
-        data: new Map(),
+        data: {},
         status: '',
       },
       gotStationInfo: {
@@ -115,6 +115,7 @@ app.get("*", (req, res) => {
       scheduleConfig: {
         depart: true
       },
+      urlCache: [],
     }));
     const initialState = store.getState();
 

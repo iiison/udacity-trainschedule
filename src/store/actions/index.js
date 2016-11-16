@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { parseString } from 'xml2js';
-import * as consts from 'constants.js';
+
+export function urlCache(url) {
+  return {
+    type: 'UPDATE_URL_CACHE',
+    url,
+  };
+}
 
 export function updateMsg(text) {
   return {
@@ -68,38 +74,21 @@ export function gotStationInfo({
 }
 
 export function getBart({
-  from,
-  to,
-  thisDate,
-  thisTime,
-  scheduleConfigDepartBool,
-  type
+  type,
+  url,
 }) {
-  let
-    cmd,
-    date,
-    functionName,
-    time,
-    url;
+  let functionName;
   switch (type) {
     case 'stationInfo': {
       functionName = gotStationInfo;
-      url = `http://api.bart.gov/api/stn.aspx?cmd=stninfo&orig=${from}&key=${consts.apikey}`;
       break;
     }
     case 'stations': {
       functionName = gotStations;
-      url = `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${consts.apikey}`;
       break;
     }
     case 'schedules': {
-      cmd = scheduleConfigDepartBool ? 'depart' : 'arrive',
-      date = `&date=${thisDate || 'now'}`,
       functionName = gotSchedules;
-      time = thisTime ? `&time=${thisTime}` : '';
-      url = consts.scheduleUrl({cmd, date, from, time, to});
-
-      console.log(`get bart data, cmd: ${cmd}, date: ${date}, type: ${type}, time: ${time}, url: ${url}`);
       break;
     }
     default: return false;
@@ -116,23 +105,23 @@ export function getBart({
     dispatch(appError(''));
 
     return axios.get(url)
-    .then((response) => parseString(response.data, (err, result) => {
-      try {
-        const errorMessage = `${result.root.message[0].error[0].text[0]}
-        ${result.root.message[0].error[0].details[0]}`;
+      .then((response) => parseString(response.data, (err, result) => {
+        try {
+          const errorMessage = `${result.root.message[0].error[0].text[0]}
+          ${result.root.message[0].error[0].details[0]}`;
 
-        return dispatch(appError(errorMessage));
-      } catch (err2) {
-        return dispatch(functionName({
-          data: result.root || err2,
-          status: 'SUCCESS',
-          url,
-        }));
-      }
-    }))
-    .catch((error) => dispatch(appError({
-      data: error,
-      status: 'ERROR',
-    })));
+          return dispatch(appError(errorMessage));
+        } catch (err2) {
+          return dispatch(functionName({
+            data: result.root || err2,
+            status: 'SUCCESS',
+            url,
+          }));
+        }
+      }))
+      .catch((error) => dispatch(appError({
+        data: error,
+        status: 'ERROR',
+      })));
   };
 }

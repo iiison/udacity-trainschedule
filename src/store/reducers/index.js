@@ -6,6 +6,12 @@ export function msg(state = Immutable({}), action) {
     state;
 }
 
+export function urlCache(state = Immutable({}), action) {
+  return action.type === 'UPDATE_URL_CACHE' ?
+    [action.url, ...state] :
+    state;
+}
+
 export function gotRandomSchedule(state = Immutable({}), action) {
   return action.type === 'RANDOM_SCHEDULE' ?
     action.bool :
@@ -45,24 +51,26 @@ export function gotStationInfo(state = Immutable({}), action) {
 
 export function gotSchedules(state = Immutable({}), action) {
   if (action.type !== 'GOT_SCHEDULES') return state;
-  let data;
-  if (state.data instanceof Map) {
-    console.log('setting this data to state.data');
-    data = state.data;
-  } else {
-    console.log('setting this data to new Map()');
-    data = new Map();
+
+  switch (action.status) {
+    case 'PENDING': {
+      return Immutable({
+        ...state,
+        status: action.status,
+      });
+    }
+    case 'SUCCESS': {
+      return Immutable({
+        ...state,
+        data: {
+          ...state.data,
+          [action.url]: action.data,
+        },
+        status: action.status,
+      });
+    }
+    default: {
+      return state;
+    }
   }
-  data.set(String(action.url), action.data);
-
-  const vanillaJavascriptObject = {
-    ...state,
-    status: action.status || 'oops'
-  };
-
-  vanillaJavascriptObject.data = data;
-  const immutableDoesNotWorkWithJavascriptMaps = Immutable(vanillaJavascriptObject);
-  console.log(`is map in javascript object?: ${vanillaJavascriptObject.data.has(action.url)}`);
-  console.log(`is map in immutable object?: ${immutableDoesNotWorkWithJavascriptMaps.data.has(action.url)}`);
-  return Immutable(immutableDoesNotWorkWithJavascriptMaps);
 }

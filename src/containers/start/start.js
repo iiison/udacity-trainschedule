@@ -7,6 +7,7 @@ import * as dom from 'lib/dom.js';
 import * as time from 'lib/time.js';
 import * as math from 'lib/math.js';
 import Stationinfo from 'components/stationinfo/stationinfo.js';
+import * as consts from 'constants.js';
 
 import { Table } from 'reactabular';
 import Popup from 'react-popup';
@@ -23,6 +24,7 @@ class Start extends React.Component {
     scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stations: React.PropTypes.object.isRequired,
+    urls: React.PropTypes.array.isRequired,
   }
 
   constructor(props) {
@@ -36,7 +38,7 @@ class Start extends React.Component {
 
   componentDidMount() {
     // get stations
-    this.props.dispatch.getBart({type: 'stations'});
+    this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -58,18 +60,24 @@ class Start extends React.Component {
           toAbbr = to[0].abbr[0];
 
         // get random schedule
-        this.props.dispatch.getBart({
+        const url = consts.scheduleUrl({
           from: fromAbbr,
           scheduleConfigDepartBool,
           to: toAbbr,
-          type: 'schedules',
         });
-        this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
 
         this.setState({
-          from: [...this.state.from, from],
-          to: [...this.state.to, to],
+          from: [from, ...this.state.from],
+          to: [to, ...this.state.to],
         });
+
+        this.props.dispatch.urlCache(url);
+        //.data.schedule[0].request[0].trip
+        this.props.dispatch.getBart({
+          type: 'schedules',
+          url,
+        });
+        this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
       } catch (err) {
         // do nothing
       }
@@ -112,13 +120,19 @@ class Start extends React.Component {
       thisDate = dateTime.substring(0, dateTime.indexOf(' ')).trim(),
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
-    return from && to ? this.props.dispatch.getBart({
+    const url = consts.scheduleUrl({
+      date: thisDate,
       from: fromAbbr,
       scheduleConfigDepartBool,
-      thisDate,
-      thisTime,
+      time: thisTime,
       to: toAbbr,
+    });
+
+    this.props.dispatch.urlCache(url);
+
+    return from && to ? this.props.dispatch.getBart({
       type: 'schedules',
+      url,
     }) : undefined;
   }
 
@@ -127,7 +141,7 @@ class Start extends React.Component {
       e.preventDefault();
       e.stopPropagation();
 
-      return this.props.dispatch.getBart({type: 'stations'});
+      return this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
     }
 
     let stations;
@@ -204,8 +218,8 @@ class Start extends React.Component {
 
     if (abbr) {
       this.props.dispatch.getBart({
-        from: abbr,
         type: 'stationInfo',
+        url: consts.stationInfoUrl({ from: abbr }),
       });
 
       return Popup.create({
@@ -378,13 +392,13 @@ class Start extends React.Component {
 
   render() {
     let
-      allSchedules,
       errMsg,
+      schedule,
       status;
     try {
       status = this.props.schedules.status,
       errMsg = this.props.appError.msg,
-      allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
+      schedule = this.props.schedules.data[this.props.urls[0]].schedule[0].request[0].trip;
     } catch (err) {
       // do nothing
     }
@@ -409,7 +423,7 @@ class Start extends React.Component {
           }
         </section>
         <section>
-          {this.renderSchedules(status, errMsg, allSchedules)}
+          {this.renderSchedules(status, errMsg, schedule)}
         </section>
       </div>
     );
@@ -420,11 +434,11 @@ const mapStateToProps = (state) =>
   ({
     appError: state.appError,
     randomSchedule: state.gotRandomSchedule,
-    savedSchedules: state.savedSchedules,
     scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
     stationDetails: state.gotStationInfo,
     stations: state.gotStations,
+    urls: state.urlCache,
   });
 
 const mapDispatchToProps = (dispatch) =>

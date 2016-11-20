@@ -326,7 +326,7 @@ module.exports = {
     "no-unsafe-negation": 2,
     "no-unused-expressions": 2,
     "no-unused-labels": 2,
-    "no-unused-vars": [2, { "args": "all" }],
+    "no-unused-vars": [2, { "args": "after-used" }],
     "no-use-before-define": 2,
     "no-useless-call": 2,
     "no-useless-computed-key": 2,

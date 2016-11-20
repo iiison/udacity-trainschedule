@@ -406,7 +406,7 @@ class Start extends React.Component {
       };
       status = this.props.schedules.status;
     } catch (err) {
-      console.log(`error in render ${err}`)
+      console.log(`error in render ${err}`);
     }
 
     return (

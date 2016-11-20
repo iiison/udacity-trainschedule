@@ -6,7 +6,7 @@ export const scheduleUrl = ({ from, to, date, scheduleConfigDepartBool, time }) 
     thisDate = `&date=${date || 'now'}`,
     thisTime = time ? `&time=${time}` : '';
 
-  return `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${thisDate}${thisTime}&key=${apikey}&b=4&a=4&l=1`;
+  return `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${thisDate}${thisTime}&b=4&a=4&l=1&key=${apikey}`;
 };
 
 export const stationInfoUrl = ({ from }) =>

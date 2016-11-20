@@ -1,7 +1,7 @@
-@import './variables.css';
-@import './calendar.css';
-@import './time.css';
-@import './slider.css';
+@import './../variables.css';
+@import './../calendar.css';
+@import './../time.css';
+@import './../slider.css';
 
 .im-btn {
   display: inline-block;

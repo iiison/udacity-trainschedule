@@ -12,7 +12,7 @@ import React from 'react';
 import routes from './routes';
 import spdy from 'spdy';
 
-//store
+// store
 import { Provider } from 'react-redux';
 import configure from './store/configure';
 
@@ -26,12 +26,12 @@ const options = {
   plain: !isProd,
   spdy: {
     plain: !isProd,
-    protocols: ['h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0'],
+    protocols: [ 'h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0' ],
     ssl: isProd
   }
 };
 
-function renderFullPage(html, preloadedState) {
+function renderFullPage (html, preloadedState) {
   const head = Helmet.rewind();
 
   return `
@@ -97,7 +97,7 @@ app.get("*", (req, res) => {
       return res.status(500).end('Internal server error');
     }
     if (!renderProps) return res.status(404).end('Not found.');
-    //setup store based on data sent in
+    // setup store based on data sent in
     const store = configure(Immutable({
       appError: { msg: '' },
       gotRandomSchedule: false,
@@ -115,11 +115,15 @@ app.get("*", (req, res) => {
       scheduleConfig: {
         depart: true
       },
-      urlCache: [],
+      urlCache: {
+        schedules: [],
+        stationInfo: [],
+        stations: [],
+      },
     }));
     const initialState = store.getState();
 
-    const InitialComponent = ( //eslint-disable-line no-extra-parens
+    const InitialComponent = ( // eslint-disable-line no-extra-parens
       <Provider store={store} >
         <RouterContext {...renderProps} />
       </Provider>

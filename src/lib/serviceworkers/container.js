@@ -1,8 +1,8 @@
-//https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
-//https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
-//https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope
-//https://serviceworke.rs/
-//https://github.com/MicheleBertoli/react-worker/blob/master/public/worker.js
+// https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
+// https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
+// https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope
+// https://serviceworke.rs/
+// https://github.com/MicheleBertoli/react-worker/blob/master/public/worker.js
 if ('serviceWorker' in navigator) {
   // navigator.serviceWorker === https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
   navigator.serviceWorker.register('./rootworker.js', {
@@ -32,11 +32,11 @@ if ('serviceWorker' in navigator) {
     console.log(`Registration failed: ${error}`);
   });
 
-  //the controlling service worker has changed
+  // the controlling service worker has changed
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     console.log('controller has changed, reload');
-    //reload the page if the user has consented, if not ask for permission
-    //for some changes (e.g. minor, or security fixes) you may want to force changes to users
+    // reload the page if the user has consented, if not ask for permission
+    // for some changes (e.g. minor, or security fixes) you may want to force changes to users
     window.location.reload();
   });
 }

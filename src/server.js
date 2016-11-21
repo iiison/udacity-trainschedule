@@ -50,7 +50,7 @@ function renderFullPage (html, preloadedState) {
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
         </script>
         <script src='/js/bundle.js' type='text/javascript'></script>
-        <!--<script src='/container.js' type='text/javascript'></script>-->
+        <script src='/container.js' type='text/javascript'></script>
       </body>
     </html>
     `;
@@ -63,6 +63,7 @@ app.use(express.static(`${__dirname}/public`));
 const serviceWorkerFileOptions = {
   dotfiles: 'deny',
   headers: {
+    'x-noah': 'hello',
     'x-sent': true,
     'x-timestamp': Date.now(),
   },

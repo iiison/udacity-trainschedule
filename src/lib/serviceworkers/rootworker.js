@@ -1,40 +1,89 @@
+/**
+ * @file service worker for root
+ * @author @noahedwardhall
+ * general pattern taken from: https://github.com/react-europe/www/blob/cfp/app/sw.js
+ */
+
+/* eslint-disable indent */
+
+import Promised from 'bluebird';
+
+ const CACHE_VERSION = 1;
+ const CURRENT_CACHES = {
+   app: `app-cache-v${CACHE_VERSION}`,
+   prefetch: `prefetch-cache-v${CACHE_VERSION}`,
+ };
+
+// self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
+  const urlsToPrefetch = [
+    "/",
+    // css files
+    // font files
+    // images
+    // etc
+  ];
+
+  /**
+   * prefetch all required urls before continuing
+   */
   event.waitUntil(
-    caches.open('v1').then((cache) =>
-      cache.addAll([
-        '/',
-        '/start',
-      ])
+    caches.open(CURRENT_CACHES.prefetch).then((cache) =>
+      cache.addAll(urlsToPrefetch.map((prefetchThisUrl) =>
+        new Request(prefetchThisUrl, { mode: 'no-cors' })
+        // https://w3c.github.io/ServiceWorker/#cross-origin-resources
+      ))
+      .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
+      .then(() => console.info('All resources have been fetched and cached.'))
     )
+    .catch((openError) => console.error(`opening cache failed: ${openError}`))
   );
-  console.log(`install event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('activate', (event) => {
-  console.log(`activate event: ${JSON.stringify(event)}`);
+  const expectedCacheNames = Object.keys(CURRENT_CACHES).map((key) =>
+    CURRENT_CACHES[key]
+  );
+
+  /**
+   * Delete all caches that aren't named in CURRENT_CACHES.
+   */
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promised.all(
+        cacheNames.map((cacheName) =>
+          expectedCacheNames.indexOf(cacheName) === -1 ?
+            caches.delete(cacheName) :
+            null
+        )
+      )
+    )
+  );
 });
 
 self.addEventListener('fetch', (event) => {
   // event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
   // event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
-  console.log(`fetch event: ${event.request.url}`);
+
+  const neverCacheUrls = [
+    'bundle.js'
+  ];
+
   event.respondWith(
     caches.match(event.request)
-      .then((respOriginal) => {
-        console.log(`response is: ${respOriginal}`);
-
-        return respOriginal || fetch(event.request)
+      .then((respOriginal) =>
+        respOriginal || fetch(event.request)
           .then((respNew) =>
-            caches.open('v1').then((cache) => {
+            caches.open(CURRENT_CACHES.app).then((cache) => {
+              console.info(`updating cache with: ${JSON.stringify(event.request.url)}`);
               cache.put(event.request, respNew.clone());
-              console.log('updated cache');
 
               return respNew;
             })
-          );
-      })
-      .catch(() => {
-        new Response('<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee</p>', {
+          )
+      )
+      .catch((err) => {
+        new Response(`<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee: ${err}</p>`, {
           headers: { 'Content-Type': 'text/html' }
         });
       })

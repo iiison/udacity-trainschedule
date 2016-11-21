@@ -157,7 +157,11 @@ module.exports = {
     "id-blacklist": 0,
     "id-length": 0,
     "id-match": 0,
-    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "indent": [2, 2, {
+      "SwitchCase": 1,
+      "VariableDeclarator": 1,
+      "MemberExpression": 1,
+    }],
     "init-declarations": 0,
     "jsx-a11y/anchor-has-content": 2,
     "jsx-a11y/aria-props": 2,

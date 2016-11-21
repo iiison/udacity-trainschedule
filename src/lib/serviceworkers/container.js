@@ -1,3 +1,7 @@
+/**
+ * @file manages all service workers in the client
+ * @author @noahedwardhall
+ */
 // https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
 // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
 // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope
@@ -5,11 +9,13 @@
 // https://github.com/MicheleBertoli/react-worker/blob/master/public/worker.js
 if ('serviceWorker' in navigator) {
   // navigator.serviceWorker === https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
+
+  // register the root worker
   navigator.serviceWorker.register('./rootworker.js', {
-    // scope
     scope: './'
-  }).then((reg) => {
-    console.log(`Controller registered! ${JSON.stringify(reg)}`);
+  })
+  // registration was successful
+  .then((reg) => {
     if (reg.installing) {
       const sw = reg.installing;
       sw.postMessage(`installed worker message`);
@@ -27,9 +33,10 @@ if ('serviceWorker' in navigator) {
           console.log(`please refresh your browser! ${JSON.stringify(reg)}`);
       });
     });
+  })
   // registration failed
-  }).catch((error) => {
-    console.log(`Registration failed: ${error}`);
+  .catch((error) => {
+    console.error(`Registration failed: ${error}`);
   });
 
   // the controlling service worker has changed
@@ -39,4 +46,4 @@ if ('serviceWorker' in navigator) {
     // for some changes (e.g. minor, or security fixes) you may want to force changes to users
     window.location.reload();
   });
-}
+} else console.info('Your browser does not offline apps :( try switching to chrome, firefox, or opera)');

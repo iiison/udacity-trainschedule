@@ -111,8 +111,10 @@ export const makeStationForm = ({
       value='Update Stations'
     />&nbsp;</span>}
     <button
+      id='schedule-config'
       onClick={switchScheduleConfig}
-    >Type: {departing ? 'Departing' : 'Arriving'}</button>
+      value={departing ? 'true' : 'false'}
+    >Type: {departing ? 'Departing at specific time' : 'Arriving by specific time'}</button>
   </form>;
 
 makeStationForm.propTypes = {

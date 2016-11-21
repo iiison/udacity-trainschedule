@@ -30,12 +30,6 @@ export function gotRandomSchedule (bool) {
   };
 }
 
-export function scheduleConfigDepart () {
-  return {
-    type: 'SCHEDULE_CONFIG_DEPART',
-  };
-}
-
 export function gotSchedules ({
   data = {},
   status = 'UNKNOWN',

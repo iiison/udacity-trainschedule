@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
-import createLocation from 'history/lib/createLocation';
 import express from 'express';
 import fs from 'fs';
 import helmet from 'helmet';
@@ -89,8 +88,7 @@ app.get('/rootworker.js', (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  const location = createLocation(req.url);
-  match({ location, routes }, (err, redirectLocation, renderProps) => {
+  match({ location: req.url, routes }, (err, redirectLocation, renderProps) => {
     if (err) {
       console.error(err);
 
@@ -112,9 +110,6 @@ app.get("*", (req, res) => {
         status: ''
       },
       msg: 'Bart Train Scheduler',
-      scheduleConfig: {
-        depart: true
-      },
       urlCache: {
         schedules: [],
         stationInfo: [],

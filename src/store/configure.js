@@ -8,6 +8,12 @@ import * as reducers from './reducers';
 
 export default (initialState) => {
   // console.log('init state', initialState);
+  // always on middlewares
+  const middleWares = [
+    promise,
+    thunk,
+  ];
+
   const isProd = process.env.NODE_ENV === "production";
   const reduxTools = !isProd &&
     typeof window !== 'undefined' &&
@@ -15,9 +21,23 @@ export default (initialState) => {
       window.devToolsExtension() :
       (f) => f;
 
-  const loggerMiddleware = createLogger({
-    stateTransformer: stateTransformer
-  });
+  // all non production middlewares
+  if (!isProd) {
+    const loggerMiddleware = createLogger({
+      collapsed: true,
+      duration: true,
+      level: 'log',
+      logErrors: true,
+      stateTransformer: stateTransformer,
+      timestamp: true,
+    });
+    middleWares.push(loggerMiddleware);
+  }
+
+  // all production only middle wares
+  if (isProd) {
+    // do nothing
+  }
 
   return createStore(
     combineReducers({
@@ -27,9 +47,7 @@ export default (initialState) => {
     initialState,
     compose(
       applyMiddleware(
-        thunk,
-        loggerMiddleware,
-        promise,
+        ...middleWares
       ),
       reduxTools
     )

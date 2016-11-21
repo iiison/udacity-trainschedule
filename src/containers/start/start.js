@@ -4,7 +4,7 @@ import { Table } from 'reactabular';
 import * as actionCreators from 'store/actions/index.js';
 import * as consts from 'constants.js';
 import * as dom from 'lib/dom.js';
-import * as forms from './lib/forms.js';
+import * as forms from 'components/forms/forms.js';
 import * as time from 'lib/time.js';
 import Popup from 'react-popup';
 import React from 'react';
@@ -16,7 +16,6 @@ class Start extends React.Component {
     appError: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.object.isRequired,
     randomSchedule: React.PropTypes.bool.isRequired,
-    scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
     stationInfo: React.PropTypes.object,
     stations: React.PropTypes.object.isRequired,
@@ -26,13 +25,16 @@ class Start extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
+      departing: true,
       m : time.moment(),
     };
   }
 
   componentDidMount () {
     // get stations
-    this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
+
+    if (!this.props.randomSchedule)
+      this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
   }
 
   componentWillReceiveProps (nextProps) {
@@ -56,7 +58,7 @@ class Start extends React.Component {
       // get first and second stations
       const
         from = options[0],
-        scheduleConfigDepartBool = this.props.scheduleConfig.depart,
+        scheduleConfigDepartBool = true,
         to = options[1];
 
       const
@@ -82,8 +84,6 @@ class Start extends React.Component {
 
       return true;
     } catch (err) {
-      console.log(`error in getInitialSchedule: ${err}`);
-
       return false;
     }
   }
@@ -106,7 +106,7 @@ class Start extends React.Component {
     if (e.stopPropagation) e.stopPropagation();
 
     const
-      scheduleConfigDepartBool = this.props.scheduleConfig.depart,
+      scheduleConfigDepartBool = this.state.departing,
       thisTarget = e.currentTarget || e;
 
     const
@@ -215,7 +215,6 @@ class Start extends React.Component {
 
       url = consts.stationInfoUrl({ from: abbr });
     } catch (err) {
-      console.log(`err in getSTation: ${err}`);
       abbr = abbr || '';
     } finally {
       if (url && this.props.stationInfo.data && this.props.stationInfo.data[url])
@@ -296,16 +295,17 @@ class Start extends React.Component {
     return false;
   }
 
-  getScheduleConfig = (type) => this.props.scheduleConfig[type];
-
+  /**
+   * flip schedule config type and possibly update schedule if both input controls have valid stations
+   * @method switchScheduleConfig
+   * @param  {[type]}             e [description]
+   * @return {[type]}             [description]
+   */
   switchScheduleConfig = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.dispatch.scheduleConfigDepart();
-
-    return document.getElementsByClassName('more-info sike').length === 0 ?
-      this.handleSubmit(document.getElementById('schedule-form')) : false;
+    this.setState({ departing: !this.state.departing });
   }
 
 
@@ -350,8 +350,6 @@ class Start extends React.Component {
         </Table.Provider>
       ];
     } catch (err) {
-      console.log(`err is get saved schedule ${err}`);
-
       return null;
     }
   }
@@ -406,7 +404,7 @@ class Start extends React.Component {
       };
       status = this.props.schedules.status;
     } catch (err) {
-      console.log(`error in render ${err}`);
+      // do nothing
     }
 
     return (
@@ -415,7 +413,7 @@ class Start extends React.Component {
         {this.renderErrors(errMsg)}
         <section id='start-forms'>
           {forms.makeStationForm({
-            departing: this.props.scheduleConfig.depart,
+            departing: this.state.departing,
             getStations: this.getStations,
             hasStations: this.props.urls.stations.length,
             switchScheduleConfig: this.switchScheduleConfig,
@@ -455,7 +453,6 @@ const mapStateToProps = (state) =>
   ({
     appError: state.appError,
     randomSchedule: state.gotRandomSchedule,
-    scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
     stationInfo: state.gotStationInfo,
     stations: state.gotStations,

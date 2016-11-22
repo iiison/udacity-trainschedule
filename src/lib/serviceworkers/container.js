@@ -15,29 +15,29 @@ if ('serviceWorker' in navigator) {
     scope: './'
   })
   // registration was successful
-  .then((reg) => {
-    if (reg.installing) {
-      const sw = reg.installing;
-      sw.postMessage(`installed worker message`);
-      console.log(`state is installing ${JSON.stringify(sw)}`);
-    } else if (reg.waiting) {
-      const sw = reg.waiting;
-      console.log(`state is waiting ${JSON.stringify(sw)},`);
-    }
+    .then((reg) => {
+      if (reg.installing) {
+        const sw = reg.installing;
+        sw.postMessage(`installed worker message`);
+        console.log(`state is installing ${JSON.stringify(sw)}`);
+      } else if (reg.waiting) {
+        const sw = reg.waiting;
+        console.log(`state is waiting ${JSON.stringify(sw)},`);
+      }
 
     // reg.installing is now the current worker
-    reg.addEventListener('updatefound', () => {
+      reg.addEventListener('updatefound', () => {
       // whenever sw.state changes
-      reg.installing.addEventListener('statechange', () => {
-        if (reg.state === 'installed')
-          console.log(`please refresh your browser! ${JSON.stringify(reg)}`);
+        reg.installing.addEventListener('statechange', () => {
+          if (reg.state === 'installed')
+            console.log(`please refresh your browser! ${JSON.stringify(reg)}`);
+        });
       });
-    });
-  })
+    })
   // registration failed
-  .catch((error) => {
-    console.error(`Registration failed: ${error}`);
-  });
+    .catch((error) => {
+      console.error(`Registration failed: ${error}`);
+    });
 
   // the controlling service worker has changed
   navigator.serviceWorker.addEventListener('controllerchange', () => {

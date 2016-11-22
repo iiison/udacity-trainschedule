@@ -2,6 +2,10 @@
  * @file service worker for root
  * @author @noahedwardhall
  * general pattern taken from: https://github.com/react-europe/www/blob/cfp/app/sw.js
+ * good readme: https://developers.google.com/web/fundamentals/getting-started/primers/service-workers
+ * good tuts: https://jakearchibald.github.io/isserviceworkerready/resources.html
+ * good Q&A: http://stackoverflow.com/questions/tagged/service-worker
+ * see all service workers: chrome://serviceworker-internals
  */
 
 /* eslint-disable indent */
@@ -25,7 +29,7 @@ self.addEventListener('install', (event) => {
   ];
 
   /**
-   * prefetch all required urls before continuing
+   * all prefetch urls are required or installation will fail
    */
   event.waitUntil(
     caches.open(CURRENT_CACHES.prefetch).then((cache) =>
@@ -38,6 +42,57 @@ self.addEventListener('install', (event) => {
     )
     .catch((openError) => console.error(`opening cache failed: ${openError}`))
   );
+});
+
+self.addEventListener('fetch', (event) => {
+  // event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
+  // event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
+
+  const neverCacheUrls = [
+    // insert urls never to cache
+    "http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round",
+    "http://fonts.gstatic.com/s/varelaround/v7/APH4jr0uSos5wiut5cpjrhampu5_7CjHW5spxoeN3Vs.woff2",
+    "http://fonts.gstatic.com/s/muli/v9/zscZFkjVRGyfQ_Pw-5exXPesZW2xOQ-xsNqO47m55DA.woff2"
+  ];
+
+  if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
+    console.log(`not caching: ${event.request.url} `);
+    event.respondWith(fetch(event.request));
+  } else {
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
+            console.log('responding with item from cache');
+
+            return response;
+          }
+
+          return fetch(event.request.clone())
+            .then((responseTwo) => {
+              // only cache valid responses
+              if (!responseTwo) {
+                console.error(`received invalid response from fetch: ${responseTwo}`);
+
+                return responseTwo;
+              }
+
+              caches.open(CURRENT_CACHES.app).then((cache) => {
+                console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
+                cache.put(event.request.clone(), responseTwo.clone());
+              });
+
+              return responseTwo.clone();
+            })
+            .catch((err) => console.err(`error in fetch: ${err}`));
+        })
+        .catch((err) => {
+          new Response(`<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee: ${err}</p>`, {
+            headers: { 'Content-Type': 'text/html' }
+          });
+        })
+    );
+  }
 });
 
 self.addEventListener('activate', (event) => {
@@ -58,35 +113,6 @@ self.addEventListener('activate', (event) => {
         )
       )
     )
-  );
-});
-
-self.addEventListener('fetch', (event) => {
-  // event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
-  // event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
-
-  const neverCacheUrls = [
-    'bundle.js'
-  ];
-
-  event.respondWith(
-    caches.match(event.request)
-      .then((respOriginal) =>
-        respOriginal || fetch(event.request)
-          .then((respNew) =>
-            caches.open(CURRENT_CACHES.app).then((cache) => {
-              console.info(`updating cache with: ${JSON.stringify(event.request.url)}`);
-              cache.put(event.request, respNew.clone());
-
-              return respNew;
-            })
-          )
-      )
-      .catch((err) => {
-        new Response(`<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee: ${err}</p>`, {
-          headers: { 'Content-Type': 'text/html' }
-        });
-      })
   );
 });
 

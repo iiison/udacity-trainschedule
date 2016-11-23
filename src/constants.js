@@ -21,6 +21,8 @@ export const getBlobType = (blob, url) =>
   url.includes('http://fonts.googleapis.com/css') ?
     // http://stackoverflow.com/questions/2871655/proper-mime-type-for-fonts
     'text/css' :
-    blob.type ?
-      blob.type :
-      'text/html';
+    url.includes('https://travis-ci.org/noahehall/udacity-trainschedule.svg') ?
+      'image/svg+xml' :
+      blob.type ?
+        blob.type :
+        'text/html';

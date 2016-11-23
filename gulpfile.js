@@ -197,7 +197,7 @@ gulp.task('copy:server-certs', () =>
 );
 
 gulp.task('copy:service-workers', (done) =>
-  glob('./src/lib/serviceworkers/*.js', (err, files) => {
+  glob('./src/serviceworkers/*.js', (err, files) => {
     if (err) done(err);
 
     const tasks = files.map((entry) =>

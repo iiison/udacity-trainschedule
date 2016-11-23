@@ -73,7 +73,7 @@ self.addEventListener('fetch', (event) => {
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
     console.log(`not caching: ${event.request.url} `);
     event.respondWith(fetch(event.request));
-  } else event.respondWith(new Promised((resolve) => {
+  } else event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
         if (!blobFound) {
           console.error(`error in retrieving from db: ${blobFound}`);
@@ -82,9 +82,9 @@ self.addEventListener('fetch', (event) => {
             .then((response) => {
               // only cache valid responses
               if (!response) {
-                console.error(`received invalid response from fetch: ${responseTwo}`);
+                console.error(`received invalid response from fetch: ${response}`);
 
-                return resolve(response);
+                return reject(response);
               }
 
               // insert response body in db
@@ -106,7 +106,7 @@ self.addEventListener('fetch', (event) => {
         }
 
         const contentType = consts.getBlobType(blobFound, event.request.url);
-        console.log('responding from cache', event.request.url, contentType);
+        console.log('responding from cache', event.request.url, contentType, blobFound.size);
         // on this page https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
         const myHeaders = new Headers({
           "Content-Length": String(blobFound.size),

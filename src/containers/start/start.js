@@ -35,6 +35,9 @@ class Start extends React.Component {
 
     if (!this.props.randomSchedule)
       this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
+
+    if (window.indexedDB)
+      console.log('found db!');
   }
 
   componentWillReceiveProps (nextProps) {

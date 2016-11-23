@@ -11,12 +11,19 @@
 /* eslint-disable indent */
 
 import Promised from 'bluebird';
+import IdbKeyval from './idb/idb';
+import * as consts from 'constants.js';
 
- const CACHE_VERSION = 1;
- const CURRENT_CACHES = {
-   app: `app-cache-v${CACHE_VERSION}`,
-   prefetch: `prefetch-cache-v${CACHE_VERSION}`,
- };
+const CURRENT_CACHES = {
+ app: `app-cache-v${consts.CACHE_VERSION}`,
+ prefetch: `prefetch-cache-v${consts.CACHE_VERSION}`,
+};
+
+const db = new IdbKeyval('udacity', 'cache');
+console.log(db.dbPromise.then(
+  (suc) => console.info(`success in creating: ${suc.length}`),
+  (err) => console.error(`error in creating: ${err}`)
+));
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -33,10 +40,24 @@ self.addEventListener('install', (event) => {
    */
   event.waitUntil(
     caches.open(CURRENT_CACHES.prefetch).then((cache) =>
-      cache.addAll(urlsToPrefetch.map((prefetchThisUrl) =>
-        new Request(prefetchThisUrl, { mode: 'no-cors' })
+      cache.addAll(urlsToPrefetch.map((prefetchThisUrl) => {
+        // set initialvalue
+        console.log('setting prefetch');
+        fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
+          .then((resp) => {
+            resp.text()
+              .then((text) => {
+                console.log(`text is: ${text.length}`);
+                db.set(
+                  prefetchThisUrl,
+                  text
+                );
+              });
+          });
+
+        return new Request(prefetchThisUrl, { mode: 'no-cors' });
         // https://w3c.github.io/ServiceWorker/#cross-origin-resources
-      ))
+      }))
       .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
       .then(() => console.info('All resources have been fetched and cached.'))
     )
@@ -58,12 +79,17 @@ self.addEventListener('fetch', (event) => {
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
     console.log(`not caching: ${event.request.url} `);
     event.respondWith(fetch(event.request));
-  } else {
+  } else
     event.respondWith(
       caches.match(event.request)
         .then((response) => {
           if (response) {
             console.log('responding with item from cache');
+
+            console.log(db.get(event.request.url).then(
+              (suc) => console.info(`item in db: ${typeof suc}`),
+              (err) => console.info(`err in db: ${err}`)
+            ));
 
             return response;
           }
@@ -78,8 +104,23 @@ self.addEventListener('fetch', (event) => {
               }
 
               caches.open(CURRENT_CACHES.app).then((cache) => {
+                responseTwo.clone().text().then(
+                  (text) => {
+                    console.log(`text in setting: ${text.length}`);
+                    db.set(
+                      event.request.url,
+                      text
+                    ).then(
+                      (suc) => console.log(`success in setting`),
+                      (err) => console.error(`error in setting: ${err}`)
+                    );
+                  }
+                )
+
                 console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
                 cache.put(event.request.clone(), responseTwo.clone());
+
+                // set value in store
               });
 
               return responseTwo.clone();
@@ -92,7 +133,6 @@ self.addEventListener('fetch', (event) => {
           });
         })
     );
-  }
 });
 
 self.addEventListener('activate', (event) => {

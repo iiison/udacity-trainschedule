@@ -75,12 +75,10 @@ class Start extends React.Component {
       if (this.props.schedules.data[url]) {
         this.props.dispatch.urlCache('schedules', url);
         this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
-
-        return true;
+      } else {
+        this.props.dispatch.getBart({ type: 'schedules', url });
+        this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
       }
-
-      this.props.dispatch.getBart({ type: 'schedules', url });
-      this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
 
       return true;
     } catch (err) {

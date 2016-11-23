@@ -9,7 +9,6 @@
 // https://github.com/MicheleBertoli/react-worker/blob/master/public/worker.js
 if ('serviceWorker' in navigator) {
   // navigator.serviceWorker === https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer
-
   // register the root worker
   navigator.serviceWorker.register('./rootworker.js', {
     scope: './'

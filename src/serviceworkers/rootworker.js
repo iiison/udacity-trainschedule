@@ -11,7 +11,7 @@
 /* eslint-disable indent */
 
 import Promised from 'bluebird';
-import IdbKeyval from './idb/idb';
+import IdbKeyval from 'serviceworkers/idb/idb';
 import * as consts from 'constants.js';
 
 const db = new IdbKeyval('udacity', 'cache');

@@ -111,11 +111,11 @@ self.addEventListener('fetch', (event) => {
                       event.request.url,
                       text
                     ).then(
-                      (suc) => console.log(`success in setting`),
+                      (suc) => console.log(`success in setting: ${typeof suc}`),
                       (err) => console.error(`error in setting: ${err}`)
                     );
                   }
-                )
+                );
 
                 console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
                 cache.put(event.request.clone(), responseTwo.clone());

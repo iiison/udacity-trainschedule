@@ -15,4 +15,4 @@ export const stationInfoUrl = ({ from }) =>
 export const stationUrl = () =>
   `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${apikey}`;
 
-export const CACHE_VERSION = 3;
+export const CACHE_VERSION = 0;

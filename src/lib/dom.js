@@ -2,6 +2,7 @@
  * inserts a child textNode into the previous element, based on the current elements validationMessage and title properties
  * @method setPreviousElementError
  * @param  {HTMLElement} el an element with a validationMessage and title property
+ * @returns {HTMLElement} Error message with string
  */
 export const setPreviousElementError = (el) =>
   el.previousSibling.firstElementChild.innerHTML = `${el.validationMessage}<br />${el.title}`;

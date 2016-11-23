@@ -1,87 +1,110 @@
-import React from 'react';
-import styles from './start.css';
-import { connect } from 'react-redux';
-import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
-import * as dom from 'lib/dom.js';
-import * as time from 'lib/time.js';
-import * as math from 'lib/math.js';
-import Stationinfo from 'components/stationinfo/stationinfo.js';
-
+import { connect } from 'react-redux';
 import { Table } from 'reactabular';
+import * as actionCreators from 'store/actions/index.js';
+import * as consts from 'constants.js';
+import * as dom from 'lib/dom.js';
+import * as forms from 'components/forms/forms.js';
+import * as time from 'lib/time.js';
 import Popup from 'react-popup';
-// import DayPicker from "react-day-picker";
-// https://github.com/wangzuo/input-moment
-import InputMoment from 'st-input-moment';
-import inputMomentStyles from './inputmoment.css';
+import React from 'react';
+import Stationinfo from 'components/stationinfo/stationinfo.js';
+import styles from './start.css';
 
 class Start extends React.Component {
   static propTypes = {
     appError: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.object.isRequired,
     randomSchedule: React.PropTypes.bool.isRequired,
-    scheduleConfig: React.PropTypes.object.isRequired,
     schedules: React.PropTypes.object.isRequired,
+    stationInfo: React.PropTypes.object,
     stations: React.PropTypes.object.isRequired,
+    urls: React.PropTypes.object.isRequired,
   }
 
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
-      from: [],
+      departing: true,
       m : time.moment(),
-      to: [],
     };
   }
 
-  componentDidMount() {
+  componentDidMount () {
     // get stations
-    this.props.dispatch.getBart({type: 'stations'});
+
+    if (!this.props.randomSchedule)
+      this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!this.props.randomSchedule && !nextProps.randomSchedule)
-      try {
-        const options = nextProps.stations.data.stations[0].station.asMutable();
+  componentWillReceiveProps (nextProps) {
+    // get initial schedule
+    if (!this.props.randomSchedule && !nextProps.randomSchedule) return this.getInitialSchedule(nextProps);
 
-        // get two random stations' abbreviation
-        const
-          from = options
-            .splice(math.getRandomInt(0, options.length), 1),
-          to = options
-            .splice(math.getRandomInt(0, options.length), 1);
-        const
-          scheduleConfigDepartBool = this.props.scheduleConfig.depart;
+    return false;
+  }
 
-        const
-          fromAbbr = from[0].abbr[0],
-          toAbbr = to[0].abbr[0];
+  /**
+   * Gets a schedule on load
+   * @method getInitialSchedule
+   * @param  {[type]}           nextProps [description]
+   * @return {[type]}           [description]
+   */
+  getInitialSchedule = (nextProps) => {
+    try {
+      const latestStation = this.props.urls.stations[0];
+      const options = nextProps.stations.data[latestStation].stations[0].station.asMutable();
 
-        // get random schedule
-        this.props.dispatch.getBart({
-          from: fromAbbr,
-          scheduleConfigDepartBool,
-          to: toAbbr,
-          type: 'schedules',
-        });
+      // get first and second stations
+      const
+        from = options[0],
+        scheduleConfigDepartBool = true,
+        to = options[1];
+
+      const
+        fromAbbr = from.abbr[0],
+        toAbbr = to.abbr[0];
+
+      // get random schedule
+      const url = consts.scheduleUrl({
+        from: fromAbbr,
+        scheduleConfigDepartBool,
+        to: toAbbr,
+      });
+
+      if (this.props.schedules.data[url]) {
+        this.props.dispatch.urlCache('schedules', url);
         this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
-
-        this.setState({
-          from: [...this.state.from, from],
-          to: [...this.state.to, to],
-        });
-      } catch (err) {
-        // do nothing
+      } else {
+        this.props.dispatch.getBart({ type: 'schedules', url });
+        this.props.dispatch.gotRandomSchedule(!this.props.randomSchedule);
       }
+
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
+  dateFormat = () =>
+    this.state.m.format(time.getDateFormat());
+
+  timeFormat = () =>
+    this.state.m.format(time.getTimeFormat());
+
+  /**
+   * Handle submission of get schedule form
+   * @method handleSubmit
+   * @param  {[type]}     e [description]
+   * @return {[type]}     [description]
+   */
   handleSubmit = (e) => {
     if (!e) return false;
-    if(e.preventDefault) e.preventDefault();
-    if(e.stopPropagation) e.stopPropagation();
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
 
     const
-      scheduleConfigDepartBool = this.props.scheduleConfig.depart,
+      scheduleConfigDepartBool = this.state.departing,
       thisTarget = e.currentTarget || e;
 
     const
@@ -112,27 +135,45 @@ class Start extends React.Component {
       thisDate = dateTime.substring(0, dateTime.indexOf(' ')).trim(),
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
-    return from && to ? this.props.dispatch.getBart({
+    const url = consts.scheduleUrl({
+      date: thisDate,
       from: fromAbbr,
       scheduleConfigDepartBool,
-      thisDate,
-      thisTime,
+      time: thisTime,
       to: toAbbr,
-      type: 'schedules',
-    }) : undefined;
+    });
+
+    if (this.props.schedules.data[url])
+      return this.props.dispatch.urlCache('schedules', url);
+
+    return from && to ?
+      this.props.dispatch.getBart({
+        type: 'schedules',
+        url,
+      }) :
+      null;
   }
 
+  /**
+   * handle submission of get stations form
+   * @method getStations
+   * @param  {[type]}    e [description]
+   * @return {[type]}    [description]
+   */
   getStations = (e) => {
-    if (e){
+    const latestStation = this.props.urls.stations[0];
+    if (e) {
       e.preventDefault();
       e.stopPropagation();
 
-      return this.props.dispatch.getBart({type: 'stations'});
+      return latestStation === consts.stationUrl() ?
+        false :
+        this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
     }
 
     let stations;
     try {
-      stations = this.props.stations.data.stations[0].station.map((station, idx) =>
+      stations = this.props.stations.data[latestStation].stations[0].station.map((station, idx) =>
         <option
           data-abbr={station.abbr}
           data-address={station.address}
@@ -146,29 +187,49 @@ class Start extends React.Component {
           {station.name}
         </option>
       );
-    }catch (err) {
+    } catch (err) {
       stations = 'Please click the button above to get stations';
     }
 
     return stations;
   }
 
+  /**
+   * get a specific station
+   * @method getStation
+   * @param  {[type]}   e [description]
+   * @return {[type]}   [description]
+   */
   getStation = (e) => {
     e.stopPropagation();
     e.preventDefault();
 
-    let abbr;
+    let abbr, url;
     try {
-      abbr = `${this.props.stations.data.stations[0].station.find((station) =>
+      const latestStation = this.props.urls.stations[0];
+      abbr = `${this.props.stations.data[latestStation].stations[0].station.find((station) =>
         station.name[0] === e.currentTarget.value
       ).abbr[0] }`;
+
+      url = consts.stationInfoUrl({ from: abbr });
     } catch (err) {
-      abbr = '';
+      abbr = abbr || '';
     } finally {
+      if (url && this.props.stationInfo.data && this.props.stationInfo.data[url])
+        this.props.dispatch.urlCache('stationInfo', url);
+      else if (url)
+        this.props.dispatch.getBart({ type: 'stationInfo', url });
+
       return dom.setNextInnerHtml(e.currentTarget, abbr);
     }
   }
 
+  /**
+   * Get more info about a station
+   * @method getMoreInfo
+   * @param  {[type]}    e [description]
+   * @return {[type]}    [description]
+   */
   getMoreInfo = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -187,7 +248,8 @@ class Start extends React.Component {
       };
 
     try {
-      thisEl = this.props.stations.data.stations[0].station.find((station) =>
+      const latestStation = this.props.urls.stations[0];
+      thisEl = this.props.stations.data[latestStation].stations[0].station.find((station) =>
         station.abbr[0] === abbr
       );
       if (thisEl) {
@@ -203,10 +265,15 @@ class Start extends React.Component {
     }
 
     if (abbr) {
-      this.props.dispatch.getBart({
-        from: abbr,
-        type: 'stationInfo',
-      });
+      const url = consts.stationInfoUrl({ from: abbr });
+      let stationExtraInfo;
+      try {
+        stationExtraInfo = this.props.stationInfo.data[url];
+      } catch (err) {
+        stationExtraInfo = {};
+      }
+      if (!stationExtraInfo.uri)
+        this.props.dispatch.getBart({ type: 'stationInfo', url });
 
       return Popup.create({
         buttons: {
@@ -218,92 +285,27 @@ class Start extends React.Component {
           }]
         },
         className: 'alert',
-        content: <Stationinfo {...stationinfo} /> || 'No information found',
+        content: <Stationinfo {...stationinfo} stationExtraInfo={stationExtraInfo} /> || 'No information found',
         title: stationinfo.name ? `${stationinfo.name} Station Information` : 'Bart Station Information',
       });
     }
+
+    return false;
   }
 
-  getScheduleConfig = (type) => this.props.scheduleConfig[type];
-
+  /**
+   * flip schedule config type and possibly update schedule if both input controls have valid stations
+   * @method switchScheduleConfig
+   * @param  {[type]}             e [description]
+   * @return {[type]}             [description]
+   */
   switchScheduleConfig = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    this.props.dispatch.scheduleConfigDepart();
-
-    return document.getElementsByClassName('more-info sike').length === 0 ?
-      this.handleSubmit(document.getElementById('schedule-form')) : false;
+    this.setState({ departing: !this.state.departing });
   }
 
-  makeScheduleForm = () =>
-    <form id='schedule-form' onSubmit={this.handleSubmit}>
-      <Popup
-        btnClass='mm-popup__btn'
-        className='mm-popup'
-        closeBtn={false}
-        closeHtml={null}
-        defaultCancel='Cancel'
-        defaultOk='Ok'
-        wildClasses={false}
-      />
-      <p>
-        <label htmlFor='depart-station'>
-          <span>Depart</span>
-          <input
-            id='depart-station'
-            list='stations'
-            onChange={this.getStation}
-            required
-          />
-          <button className='more-info sike' onClick={this.getMoreInfo} />
-        </label>
-        <label htmlFor='arrive-station'>
-          <span>Arrive</span>
-          <input
-            id='arrive-station'
-            list='stations'
-            onChange={this.getStation}
-            required
-          />
-          <button className='more-info sike' onClick={this.getMoreInfo} />
-        </label>
-        <label htmlFor='date'>
-          <span>Date</span>
-          <input
-            id='date'
-            onClick={this.handleClockShowDate}
-            readOnly
-            required
-            type='date'
-            value={this.state.m.format(time.getDateFormat())}
-          />
-        </label>
-        <label htmlFor='time'>
-          <span>Time</span>
-          <input
-            id='time'
-            onClick={this.handleClockShowTime}
-            readOnly
-            required
-            type='time'
-            value={this.state.m.format(time.getTimeFormat())}
-          />
-        </label>
-      </p>
-      <section id ='inputmoment'>
-        <style scoped type='text/css'>{inputMomentStyles}</style>
-        <InputMoment
-          moment={this.state.m}
-          onChange={this.handleClockChange}
-          onSave={this.handleClockSave}
-        />
-      </section>
-      <datalist id='stations'>
-        <select id='stations-select' >{this.getStations()}</select>
-      </datalist>
-      <input type='submit' value='Submit' />
-    </form>;
 
   /**
    * returns renderable list
@@ -350,13 +352,22 @@ class Start extends React.Component {
     }
   }
 
-  renderSchedules = (status, errMsg, allSchedules) => {
+  renderSchedules = ({
+    errMsg,
+    schedule,
+    stations,
+    status
+  }) => {
     if (status !== 'SUCCESS' || errMsg) return null;
 
-    const formattedSchedules = this.getSavedSchedules(allSchedules);
+    const formattedSchedules = this.getSavedSchedules(schedule);
 
     return formattedSchedules ?
       <div className='schedules'>
+        <section style={{ textAlign: 'center' }}>
+          {stations.origin && <div>From: {stations.origin}</div>}
+          {stations.destination && <div>To: {stations.destination}</div>}
+        </section>
         {formattedSchedules}
       </div> :
       null;
@@ -365,7 +376,7 @@ class Start extends React.Component {
   renderErrors = (e) => e ? <h1>{e}</h1> : null;
 
   handleClockChange = (m) =>
-    this.setState({m: m});
+    this.setState({ m: m });
 
   handleClockSave = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'none';
@@ -376,15 +387,20 @@ class Start extends React.Component {
   handleClockShowTime = () =>
     document.getElementsByClassName("m-input-moment")[0].style.display = 'block';
 
-  render() {
+  render () {
     let
-      allSchedules,
-      errMsg,
-      status;
+      errMsg = '',
+      schedule = [],
+      stations = {},
+      status = '';
     try {
-      status = this.props.schedules.status,
-      errMsg = this.props.appError.msg,
-      allSchedules = this.props.schedules.data.schedule[0].request[0].trip;
+      errMsg = this.props.appError.msg;
+      schedule = this.props.schedules.data[this.props.urls.schedules[0]].schedule[0].request[0].trip;
+      stations = {
+        destination: this.props.schedules.data[this.props.urls.schedules[0]].destination[0],
+        origin: this.props.schedules.data[this.props.urls.schedules[0]].origin[0],
+      };
+      status = this.props.schedules.status;
     } catch (err) {
       // do nothing
     }
@@ -394,22 +410,37 @@ class Start extends React.Component {
         <style scoped type='text/css'>{styles}</style>
         {this.renderErrors(errMsg)}
         <section id='start-forms'>
-          <form id='station-form' onSubmit={this.getStations}>
-            <input
-              type='submit'
-              value='Update Stations'
-            />&nbsp;
-            <button
-              onClick={this.switchScheduleConfig}
-            >Type: {this.props.scheduleConfig.depart ? 'Departing' : 'Arriving'}</button>
-          </form>
+          {forms.makeStationForm({
+            departing: this.state.departing,
+            getStations: this.getStations,
+            hasStations: this.props.urls.stations.length,
+            switchScheduleConfig: this.switchScheduleConfig,
+          })}
           {
             this.props.stations.status === 'SUCCESS' &&
-            this.makeScheduleForm()
+            forms.makeScheduleForm({
+              dateFormat: this.dateFormat,
+              getMoreInfo: this.getMoreInfo,
+              getStation: this.getStation,
+              getStations: this.getStations,
+              handleClockChange: this.handleClockChange,
+              handleClockSave: this.handleClockSave,
+              handleClockShowDate: this.handleClockShowDate,
+              handleClockShowTime: this.handleClockShowTime,
+              handleSubmit: this.handleSubmit,
+              Popup,
+              thisMoment: this.state.m,
+              timeFormat: this.timeFormat,
+            })
           }
         </section>
         <section>
-          {this.renderSchedules(status, errMsg, allSchedules)}
+          {this.renderSchedules({
+            errMsg,
+            schedule,
+            stations,
+            status
+          })}
         </section>
       </div>
     );
@@ -420,10 +451,10 @@ const mapStateToProps = (state) =>
   ({
     appError: state.appError,
     randomSchedule: state.gotRandomSchedule,
-    scheduleConfig: state.scheduleConfig,
     schedules: state.gotSchedules,
-    stationDetails: state.gotStationInfo,
+    stationInfo: state.gotStationInfo,
     stations: state.gotStations,
+    urls: state.urlCache,
   });
 
 const mapDispatchToProps = (dispatch) =>

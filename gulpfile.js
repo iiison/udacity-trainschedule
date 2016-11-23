@@ -31,49 +31,49 @@ const
 
 const isProd = process.env.NODE_ENV === "production";
 
-function createBundler(useWatchify, server) {
+function createBundler (useWatchify, server) {
   return browserify({
     browserField : server ? false : true,
     builtins : server ? false : true,
     cache: {},
     commondir : server ? false : true,
     debug: !isProd,
-    //ignore all globals
+    // ignore all globals
     detectGlobals: server ? false : true,
     entries: [`src/${server ? 'server' : 'client'}.js`],
     fullPaths: !isProd,
     packageCache: {},
-    plugin: isProd || !useWatchify ? []: [[lrload, {
+    plugin: isProd || !useWatchify ? [] : [[ lrload, {
       client: true,
       host: '127.0.0.1',
       port: 4474,
       server: true,
     }]],
     transform: [
-      [stringify, {
+      [ stringify, {
         appliesTo: { includeExtensions: ['.md'] },
         minify: isProd
       }],
-      [postCss, {
-        extensions: ['.css', '.scss'],
+      [ postCss, {
+        extensions: [ '.css', '.scss' ],
         inject: false,
         plugin:[
-          ['postcss-import', {
+          [ 'postcss-import', {
             from: 'src/',
             path: [
               'node_modules/ionicons/dist/css',
               'node_modules/ionicons/dist/fonts',
             ]
           }],
-          ['postcss-cssnext', {
+          [ 'postcss-cssnext', {
             browsers: ['last 3 versions']
           }],
           'postcss-extend',
-          [reporter, { clearMessages: true }]
+          [ reporter, { clearMessages: true }]
         ]
       }],
-      [babelify, {}],
-      [envify, {}]
+      [ babelify, {}],
+      [ envify, {}]
     ]
 
     /* ignore specific globals, should only be set when server is true
@@ -115,7 +115,7 @@ gulp.task("bundle:client", () => {
 gulp.task("watch:client", () => {
   const bundler = createBundler(true, false);
   const watcher = watchify(bundler);
-  function rebundle() {
+  function rebundle () {
     gutil.log("Update JavaScript bundle");
     watcher
       .bundle()
@@ -138,10 +138,10 @@ gulp.task("watch:client", () => {
 gulp.task("watch:server", () =>
   nodemon({
     ext: "js",
-    ignore: ["gulpfile.js", "node_modules/*"],
+    ignore: [ "gulpfile.js", "node_modules/*" ],
     script: "dist/server.js",
-    tasks: ['bundle:server'],
-    watch: ['src/server.js', 'dist/public/js/bundle.js']
+    tasks: [ 'copy:service-workers', 'bundle:server' ],
+    watch: [ 'src/server.js', 'dist/public/js/bundle.js', 'src/lib/serviceworkers' ]
   })
   .on("error", gutil.log)
   .on("change", gutil.log)
@@ -149,7 +149,7 @@ gulp.task("watch:server", () =>
 );
 
 gulp.task('test', () =>
-  gulp.src(['./src/**/*.test.js'], {read: false})
+  gulp.src(['./src/**/*.test.js'], { read: false })
     .pipe(mocha({
       debugBrk: !isProd,
       istanbul: !isProd,
@@ -164,7 +164,7 @@ gulp.task('eslint', () =>
     // So, it's best to have gulp ignore the directory as well.
     // Also, Be sure to return the stream from the task;
     // Otherwise, the task may end before the stream has finished.
-  gulp.src(['./src/**/*.js', '!node_modules/**'])
+  gulp.src([ './src/**/*.js', '!node_modules/**' ])
     // eslint() attaches the lint output to the "eslint" property
     // of the file object so it can be used by other modules.
     .pipe(eslint())
@@ -183,8 +183,8 @@ gulp.task('stylelint', () =>
     debug: !isProd,
     failAfterError: true,
     reporters: [
-      {console: true, formatter: 'verbose'},
-      {formatter: 'json', save: 'report.json'}
+      { console: true, formatter: 'verbose' },
+      { formatter: 'json', save: 'report.json' }
     ],
     reportOutputDir: 'coverage/lint',
   }))
@@ -198,7 +198,7 @@ gulp.task('copy:server-certs', () =>
 
 gulp.task('copy:service-workers', (done) =>
   glob('./src/lib/serviceworkers/*.js', (err, files) => {
-    if(err) done(err);
+    if (err) done(err);
 
     const tasks = files.map((entry) =>
       browserify({
@@ -211,8 +211,8 @@ gulp.task('copy:service-workers', (done) =>
         fullPaths: isProd,
         packageCache: {},
         transform: [
-          [babelify, {}],
-          [envify, {}]
+          [ babelify, {}],
+          [ envify, {}]
         ]
       })
         .bundle()
@@ -244,4 +244,9 @@ gulp.task("prod", gulpSequence(
   'copy:service-workers',
   'bundle:server',
   'bundle:client'
+));
+
+gulp.task('lint', gulpSequence(
+  'stylelint',
+  'eslint'
 ));

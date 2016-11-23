@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
-import createLocation from 'history/lib/createLocation';
 import express from 'express';
 import fs from 'fs';
 import helmet from 'helmet';
@@ -12,7 +11,7 @@ import React from 'react';
 import routes from './routes';
 import spdy from 'spdy';
 
-//store
+// store
 import { Provider } from 'react-redux';
 import configure from './store/configure';
 
@@ -26,12 +25,12 @@ const options = {
   plain: !isProd,
   spdy: {
     plain: !isProd,
-    protocols: ['h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0'],
+    protocols: [ 'h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0' ],
     ssl: isProd
   }
 };
 
-function renderFullPage(html, preloadedState) {
+function renderFullPage (html, preloadedState) {
   const head = Helmet.rewind();
 
   return `
@@ -64,6 +63,7 @@ app.use(express.static(`${__dirname}/public`));
 const serviceWorkerFileOptions = {
   dotfiles: 'deny',
   headers: {
+    'x-noah': 'hello',
     'x-sent': true,
     'x-timestamp': Date.now(),
   },
@@ -89,20 +89,20 @@ app.get('/rootworker.js', (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  const location = createLocation(req.url);
-  match({ location, routes }, (err, redirectLocation, renderProps) => {
+  match({ location: req.url, routes }, (err, redirectLocation, renderProps) => {
     if (err) {
       console.error(err);
 
       return res.status(500).end('Internal server error');
     }
     if (!renderProps) return res.status(404).end('Not found.');
-    //setup store based on data sent in
+    // setup store based on data sent in
     const store = configure(Immutable({
       appError: { msg: '' },
       gotRandomSchedule: false,
       gotSchedules: {
-        status: ''
+        data: {},
+        status: '',
       },
       gotStationInfo: {
         status: ''
@@ -111,13 +111,15 @@ app.get("*", (req, res) => {
         status: ''
       },
       msg: 'Bart Train Scheduler',
-      scheduleConfig: {
-        depart: true
+      urlCache: {
+        schedules: [],
+        stationInfo: [],
+        stations: [],
       },
     }));
     const initialState = store.getState();
 
-    const InitialComponent = ( //eslint-disable-line no-extra-parens
+    const InitialComponent = ( // eslint-disable-line no-extra-parens
       <Provider store={store} >
         <RouterContext {...renderProps} />
       </Provider>
@@ -130,7 +132,6 @@ app.get("*", (req, res) => {
   return true;
 });
 
-// app.listen(3000);
 spdy.createServer(options, app)
   .listen(port, (error) => { // eslint-disable-line consistent-return
     if (error) {

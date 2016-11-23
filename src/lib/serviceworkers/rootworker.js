@@ -14,14 +14,9 @@ import Promised from 'bluebird';
 import IdbKeyval from './idb/idb';
 import * as consts from 'constants.js';
 
-const CURRENT_CACHES = {
- app: `app-cache-v${consts.CACHE_VERSION}`,
- prefetch: `prefetch-cache-v${consts.CACHE_VERSION}`,
-};
-
 const db = new IdbKeyval('udacity', 'cache');
 console.log(db.dbPromise.then(
-  (suc) => console.info(`success in creating: ${suc.length}`),
+  (suc) => console.info(`success in creating: ${suc}`),
   (err) => console.error(`error in creating: ${err}`)
 ));
 
@@ -38,30 +33,30 @@ self.addEventListener('install', (event) => {
   /**
    * all prefetch urls are required or installation will fail
    */
-  event.waitUntil(
-    caches.open(CURRENT_CACHES.prefetch).then((cache) =>
-      cache.addAll(urlsToPrefetch.map((prefetchThisUrl) => {
-        // set initialvalue
-        console.log('setting prefetch');
-        fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
+  event.waitUntil(new Promised((resolve, reject) => {
+    const complete = urlsToPrefetch.map((prefetchThisUrl) => {
+      // set initialvalue
+      console.log('setting prefetch');
+
+      return fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
           .then((resp) => {
-            resp.text()
-              .then((text) => {
-                console.log(`text is: ${text.length}`);
-                db.set(
-                  prefetchThisUrl,
-                  text
-                );
+            resp.blob()
+              .then((blob) => {
+                console.log(`text is: ${blob.size}, ${blob.type}`);
+
+                return db.set(prefetchThisUrl, blob);
               });
           });
-
-        return new Request(prefetchThisUrl, { mode: 'no-cors' });
-        // https://w3c.github.io/ServiceWorker/#cross-origin-resources
-      }))
-      .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
-      .then(() => console.info('All resources have been fetched and cached.'))
-    )
-    .catch((openError) => console.error(`opening cache failed: ${openError}`))
+    });
+    if (complete.length) {
+      console.log(`completed pre fetching: ${complete}`);
+      resolve(complete);
+    } else {
+      console.error(`did not complete fetching: ${complete.length}`);
+      reject();
+    }
+  })
+    .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
   );
 });
 
@@ -71,70 +66,68 @@ self.addEventListener('fetch', (event) => {
 
   const neverCacheUrls = [
     // insert urls never to cache
-    "http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round",
-    "http://fonts.gstatic.com/s/varelaround/v7/APH4jr0uSos5wiut5cpjrhampu5_7CjHW5spxoeN3Vs.woff2",
-    "http://fonts.gstatic.com/s/muli/v9/zscZFkjVRGyfQ_Pw-5exXPesZW2xOQ-xsNqO47m55DA.woff2"
+    // wtf is up with this mime type?
+    'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round'
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
     console.log(`not caching: ${event.request.url} `);
     event.respondWith(fetch(event.request));
-  } else
-    event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          if (response) {
-            console.log('responding with item from cache');
-
-            console.log(db.get(event.request.url).then(
-              (suc) => console.info(`item in db: ${typeof suc}`),
-              (err) => console.info(`err in db: ${err}`)
-            ));
-
-            return response;
-          }
+  } else event.respondWith(new Promised((resolve) => {
+    db.get(event.request.url).then((blobFound) => {
+        if (!blobFound) {
+          console.error(`error in retrieving from db: ${blobFound}`);
 
           return fetch(event.request.clone())
-            .then((responseTwo) => {
+            .then((response) => {
               // only cache valid responses
-              if (!responseTwo) {
+              if (!response) {
                 console.error(`received invalid response from fetch: ${responseTwo}`);
 
-                return responseTwo;
+                return resolve(response);
               }
 
-              caches.open(CURRENT_CACHES.app).then((cache) => {
-                responseTwo.clone().text().then(
-                  (text) => {
-                    console.log(`text in setting: ${text.length}`);
-                    db.set(
-                      event.request.url,
-                      text
-                    ).then(
-                      (suc) => console.log(`success in setting: ${typeof suc}`),
-                      (err) => console.error(`error in setting: ${err}`)
-                    );
-                  }
-                );
+              // insert response body in db
+              response.clone().blob().then(
+                (blob) => {
+                  console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
+                  db.set(
+                    event.request.url,
+                    blob
+                  ).then(
+                    (suc2) => console.log(`success in setting: ${suc2}`),
+                    (err2) => console.error(`error in setting: ${err2}`)
+                  );
+                }
+              );
 
-                console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
-                cache.put(event.request.clone(), responseTwo.clone());
+              return resolve(response);
+            });
+        }
 
-                // set value in store
-              });
+        const contentType = consts.getBlobType(blobFound, event.request.url);
+        console.log('responding from cache', event.request.url, contentType);
+        // on this page https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+        const myHeaders = new Headers({
+          "Content-Length": String(blobFound.size),
+          "Content-Type": contentType,
+          "X-Custom-Header": "ProcessThisImmediately",
+        });
 
-              return responseTwo.clone();
-            })
-            .catch((err) => console.err(`error in fetch: ${err}`));
-        })
-        .catch((err) => {
-          new Response(`<p>Hello from your friendly neighbourhood spider man!<br /><br/> Sorry our servers are out getting coffee: ${err}</p>`, {
-            headers: { 'Content-Type': 'text/html' }
-          });
-        })
-    );
+        const init = {
+          'content-type': 'text/html; charset=utf-8',
+          'headers': myHeaders,
+          'status' : 200,
+          'statusText' : 'OKS',
+        };
+        const response = new Response(blobFound, init);
+
+        return resolve(response);
+    });
+  }));
 });
 
+/*
 self.addEventListener('activate', (event) => {
   const expectedCacheNames = Object.keys(CURRENT_CACHES).map((key) =>
     CURRENT_CACHES[key]
@@ -142,7 +135,7 @@ self.addEventListener('activate', (event) => {
 
   /**
    * Delete all caches that aren't named in CURRENT_CACHES.
-   */
+   *
   event.waitUntil(
     caches.keys().then((cacheNames) =>
       Promised.all(
@@ -155,6 +148,7 @@ self.addEventListener('activate', (event) => {
     )
   );
 });
+*/
 
 self.addEventListener('sync', (event) => {
   console.log(`sync event: ${JSON.stringify(event)}`);

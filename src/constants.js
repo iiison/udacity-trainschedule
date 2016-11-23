@@ -16,3 +16,11 @@ export const stationUrl = () =>
   `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${apikey}`;
 
 export const CACHE_VERSION = 0;
+
+export const getBlobType = (blob, url) =>
+  url.includes('http://fonts.googleapis.com/css') ?
+    // http://stackoverflow.com/questions/2871655/proper-mime-type-for-fonts
+    'text/css' :
+    blob.type ?
+      blob.type :
+      'text/html';

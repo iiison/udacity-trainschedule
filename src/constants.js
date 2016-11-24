@@ -15,7 +15,7 @@ export const stationInfoUrl = ({ from }) =>
 export const stationUrl = () =>
   `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${apikey}`;
 
-export const CACHE_VERSION = 2;
+export const CACHE_VERSION = 1;
 
 export const getBlobType = (blob, url) =>
   url.includes('http://fonts.googleapis.com/css') ?

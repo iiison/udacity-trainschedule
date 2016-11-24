@@ -39,8 +39,8 @@ class Start extends React.Component {
       this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
 
     if (Idbstore) {
-      //const db = new Idbstore('udacity', 'cache');
-      //console.log(db);
+      // const db = new Idbstore('udacity', 'cache');
+      // console.log(db);
     } else console.log('db not found!');
   }
 

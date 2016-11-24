@@ -15,6 +15,17 @@ import Idbstore from 'serviceworkers/idb/idb';
 import * as consts from 'constants.js';
 
 const db = new Idbstore('udacity', 'cache');
+db.dbPromise.then(
+  () => {
+    console.dir(db);
+    if (db.success) console.log(db.success);
+    else('db is not successful')
+  },
+  (bad) => {
+    console.dir(bad)
+    console.error(`db failed to instantiate2`);
+  }
+);
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -32,18 +43,19 @@ self.addEventListener('install', (event) => {
   event.waitUntil(new Promised((resolve, reject) => {
     const complete = urlsToPrefetch.map((prefetchThisUrl) =>
       fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
-        .then((resp) => {
+        .then((resp) =>
           resp.blob()
             .then((blob) => {
-              console.log(`blob is: ${blob.size}, ${blob.type}`);
+              console.info(`blob is: ${blob.size}, ${blob.type}`);
 
               return db.set(prefetchThisUrl, blob);
-            });
-        })
+            })
+        )
     );
+
     if (complete.length)
       resolve(complete);
-     else {
+    else {
       console.error(`did not complete fetching: ${complete.length}`);
       reject();
     }
@@ -52,29 +64,33 @@ self.addEventListener('install', (event) => {
   );
 });
 
+/**
+ * event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
+ * event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
+ * headers https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+ */
 self.addEventListener('fetch', (event) => {
-  // event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
-  // event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
-
   const neverCacheUrls = [
-    // insert urls never to cache
     // wtf is up with this mime type?
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
     // wtf is up with caching svgs ?
     'https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
+    'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
     console.log(`not caching: ${event.request.url} `);
-    event.respondWith(fetch(event.request));
-  } else event.respondWith(new Promised((resolve, reject) => {
+
+    return event.respondWith(fetch(event.request));
+  }
+
+  event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
         console.info(`content not found in DB, requesting from the matrix`);
 
         return fetch(event.request.clone())
           .then((response) => {
-            // only cache valid responses
             if (!response) {
               console.error(`received invalid response from fetch: ${response}`);
 
@@ -84,15 +100,16 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
+                console.info(`updating db with: ${JSON.stringify(event.request.clone().url)}`);
                 db.set(
                   event.request.url,
                   blob
                 ).then(
-                  (suc2) => console.log(`success in setting: ${suc2}`),
-                  (err2) => console.error(`error in setting: ${err2}`)
+                  (success) => console.log(`success in setting: ${success}`),
+                  (error) => console.error(`error in setting: ${error}`)
                 );
-              }
+              },
+              (noBlob) => console.error(`blob not generated from cloned response:${noBlob}`)
             );
 
             return resolve(response);
@@ -101,7 +118,7 @@ self.addEventListener('fetch', (event) => {
 
       const contentType = consts.getBlobType(blobFound, event.request.url);
       console.log('responding from cache', event.request.url, contentType, blobFound.size);
-      // on this page https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+
       const myHeaders = {
         "Content-Length": String(blobFound.size),
         "Content-Type": contentType,
@@ -109,7 +126,6 @@ self.addEventListener('fetch', (event) => {
       };
 
       const init = {
-        'content-type': 'text/html; charset=utf-8',
         'headers': myHeaders,
         'status' : 200,
         'statusText' : 'OKS',

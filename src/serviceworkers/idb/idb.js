@@ -1,7 +1,7 @@
 import idb from 'idb';
 import * as consts from 'constants.js';
 
-export class Idbstore {
+export class idbKeyval {
   constructor (dbName, initialStore) {
     this.dbName = dbName;
     this.store = `${initialStore}${consts.CACHE_VERSION}`;
@@ -10,10 +10,9 @@ export class Idbstore {
       consts.CACHE_VERSION || 1,
       (upgradeDB) => {
         const curVer = upgradeDB.oldVersion;
-        const neededVer = consts.CACHE_VERSION;
+        const neededVer = consts.CACHE_VERSION || 1;
 
         // works for creating stores starting at index 0 and no stores exist
-        // check upgraeDB.objectStoreNames and set this logic correctly
         let idx = Number(neededVer) > Number(curVer) ?
           curVer :
           0;
@@ -25,7 +24,11 @@ export class Idbstore {
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
         }
       }
-    );
+    ).then(
+      (good) => good,
+      (bad) => this.error = bad
+    ).catch((err) => this.catch = err);
+    this.success = true;
   }
 
   clear (store = this.store) {
@@ -60,7 +63,7 @@ export class Idbstore {
 
       // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
       // openKeyCursor isn't supported by Safari, so we fall back
-      (thisStore.iterateKeyCursor || thisStore.iterateCursor).call(thisStore, (cursor) => {
+      (thisStore.iterateKeyCursor || thisStore.iterateCursor).call(store, (cursor) => {
         if (!cursor) return;
         keys.push(cursor.key);
         cursor.continue();
@@ -80,4 +83,4 @@ export class Idbstore {
   }
 }
 
-export default Idbstore;
+export default idbKeyval;

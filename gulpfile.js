@@ -141,7 +141,7 @@ gulp.task("watch:server", () =>
     ignore: [ "gulpfile.js", "node_modules/*" ],
     script: "dist/server.js",
     tasks: [ 'copy:service-workers', 'bundle:server' ],
-    watch: [ 'src/server.js', 'dist/public/js/bundle.js', 'src/lib/serviceworkers' ]
+    watch: [ 'src/server.js', 'dist/public/js/bundle.js', 'src/serviceworkers' ]
   })
   .on("error", gutil.log)
   .on("change", gutil.log)

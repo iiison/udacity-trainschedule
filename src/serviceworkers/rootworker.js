@@ -9,12 +9,23 @@
  */
 
 /* eslint-disable indent */
-
+require('../.globals/constants.js');
+require('../.globals/functions.js');
 import Promised from 'bluebird';
-import IdbKeyval from 'serviceworkers/idb/idb';
-import * as consts from 'constants.js';
+import Idbstore from 'serviceworkers/idb/idb';
 
-const db = new IdbKeyval('udacity', 'cache');
+const db = new Idbstore('udacity', 'cache');
+db.dbPromise.then(
+  () => {
+    appFuncs.consoleThis(db, 'dir');
+    if (db.success) appFuncs.consoleThis(db.success);
+    else appFuncs.consoleThis('db did not successfully instantiate', 'error');
+  },
+  (bad) => {
+    appFuncs.consoleThis(bad, 'dir');
+    appFuncs.consoleThis('db rejected on instantiation', 'error');
+  }
+);
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -30,95 +41,98 @@ self.addEventListener('install', (event) => {
    * all prefetch urls are required or installation will fail
    */
   event.waitUntil(new Promised((resolve, reject) => {
-    const complete = urlsToPrefetch.map((prefetchThisUrl) => {
-      // set initialvalue
-      console.log('setting prefetch');
+    const complete = urlsToPrefetch.map((prefetchThisUrl) =>
+      fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
+        .then((resp) =>
+          resp.blob()
+            .then((blob) => {
+              appFuncs.consoleThis(`blob is: ${blob.size}, ${blob.type}`, 'info');
 
-      return fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
-          .then((resp) => {
-            resp.blob()
-              .then((blob) => {
-                console.log(`text is: ${blob.size}, ${blob.type}`);
+              return db.set(prefetchThisUrl, blob);
+            })
+        )
+    );
 
-                return db.set && db.set(prefetchThisUrl, blob);
-              });
-          });
-    });
-    if (complete.length) {
-      console.log(`completed pre fetching: ${complete}`);
+    if (complete.length)
       resolve(complete);
-    } else {
-      console.error(`did not complete fetching: ${complete.length}`);
+    else {
+      appFuncs.consoleThis(`did not complete fetching: ${complete.length}`, 'error');
       reject();
     }
   })
-    .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
+    .catch((addAllError) => appFuncs.consoleThis(`error in adding prefetch urls: ${addAllError}`, 'error'))
   );
 });
 
+/**
+ * event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
+ * event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
+ * headers https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+ */
 self.addEventListener('fetch', (event) => {
-  // event api: https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent
-  // event.request API https://developer.mozilla.org/en-US/docs/Web/API/Request
-
   const neverCacheUrls = [
-    // insert urls never to cache
     // wtf is up with this mime type?
-    'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round'
+    'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
+    // wtf is up with caching svgs ?
+    'https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
+    'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
-    console.log(`not caching: ${event.request.url} `);
-    event.respondWith(fetch(event.request));
-  } else event.respondWith(new Promised((resolve, reject) => {
+    appFuncs.consoleThis(`not caching: ${event.request.url} `);
+
+    return event.respondWith(fetch(event.request));
+  }
+
+  return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
-        if (!blobFound) {
-          console.error(`error in retrieving from db: ${blobFound}`);
+      if (!blobFound) {
+        appFuncs.consoleThis(`content not found in DB, requesting from the matrix`, 'info');
 
-          return fetch(event.request.clone())
-            .then((response) => {
-              // only cache valid responses
-              if (!response) {
-                console.error(`received invalid response from fetch: ${response}`);
+        return fetch(event.request.clone())
+          .then((response) => {
+            if (!response) {
+              appFuncs.consoleThis(`received invalid response from fetch: ${response}`);
 
-                return reject(response);
-              }
+              return reject(response);
+            }
 
-              // insert response body in db
-              response.clone().blob().then(
-                (blob) => {
-                  console.info(`updating cache with: ${JSON.stringify(event.request.clone().url)}, then returning`);
-                  db.set(
-                    event.request.url,
-                    blob
-                  ).then(
-                    (suc2) => console.log(`success in setting: ${suc2}`),
-                    (err2) => console.error(`error in setting: ${err2}`)
-                  );
-                }
-              );
+            // insert response body in db
+            response.clone().blob().then(
+              (blob) => {
+                appFuncs.consoleThis(`updating db with: ${JSON.stringify(event.request.clone().url)}`, 'info');
+                db.set(
+                  event.request.url,
+                  blob
+                ).then(
+                  (success) => appFuncs.consoleThis(`success in setting: ${success}`),
+                  (error) => appFuncs.consoleThis(`error in setting: ${error}`, 'error')
+                );
+              },
+              (noBlob) => appFuncs.consoleThis(`blob not generated from cloned response:${noBlob}`)
+            );
 
-              return resolve(response);
-            });
-        }
+            return resolve(response);
+          });
+      }
 
-        const contentType = consts.getBlobType(blobFound, event.request.url);
-        console.log('responding from cache', event.request.url, contentType, blobFound.size);
-        // on this page https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-        const myHeaders = new Headers({
-          "Content-Length": String(blobFound.size),
-          "Content-Type": contentType,
-          "X-Custom-Header": "ProcessThisImmediately",
-        });
+      const contentType = appFuncs.getBlobType(blobFound, event.request.url);
+      appFuncs.consoleThis('responding from cache', event.request.url, contentType, blobFound.size);
 
-        const init = {
-          'content-type': 'text/html; charset=utf-8',
-          'headers': myHeaders,
-          'status' : 200,
-          'statusText' : 'OKS',
-        };
-        const response = new Response(blobFound, init);
+      const myHeaders = {
+        "Content-Length": String(blobFound.size),
+        "Content-Type": contentType,
+        "X-Custom-type": "Provided by Serviceworker",
+      };
 
-        return resolve(response);
+      const init = {
+        'headers': myHeaders,
+        'status' : 200,
+        'statusText' : 'OKS',
+      };
+      const response = new Response(blobFound, init);
+
+      return resolve(response);
     });
   }));
 });
@@ -147,14 +161,14 @@ self.addEventListener('activate', (event) => {
 */
 
 self.addEventListener('sync', (event) => {
-  console.log(`sync event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`sync event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('push', (event) => {
-  console.log(`push event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`push event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('message', (event) => {
   // event.data === whatever sent from Client.postMessage
-  console.log(`message event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`message event: ${JSON.stringify(event)}`);
 });

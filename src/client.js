@@ -1,3 +1,5 @@
+require('./.globals/constants.js');
+require('./.globals/functions.js');
 import { browserHistory, Router } from 'react-router';
 import { Provider } from 'react-redux';
 import { render } from 'react-dom';

@@ -12,7 +12,7 @@ This application is based on [this boilerplate project](https://github.com/noahe
   - $ npm run eslint #run eslint on all .js files within /src*
 
 # CI
-  - [![Build Status](https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master)](https://travis-ci.org/noahehall/udacity-trainschedule)
+  - [![Build Status](https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master)
 
 # Requirements
   - You must build an application that allows users to select a departure and arrival train station.

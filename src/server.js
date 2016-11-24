@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-require('./.globals/constants.js');
-require('./.globals/functions.js');
+require('./.globals');
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
 import express from 'express';

@@ -3,6 +3,8 @@
  * @see https://www.hacksparrow.com/global-variables-in-node-js.html
  * @type {Object}
  */
+require('./constants.js');
+
 const appFuncs = {
   scheduleUrl ({ from, to, date, scheduleConfigDepartBool, time }) {
     const
@@ -10,15 +12,15 @@ const appFuncs = {
     thisDate = `&date=${date || 'now'}`,
     thisTime = time ? `&time=${time}` : '';
 
-    return `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${thisDate}${thisTime}&b=4&a=4&l=1&key=${apikey}`;
+    return `http://api.bart.gov/api/sched.aspx?cmd=${cmd}&orig=${from}&dest=${to}${thisDate}${thisTime}&b=4&a=4&l=1&key=${appConsts.apiKey}`;
   },
 
   stationInfoUrl ({ from }) {
-    return `http://api.bart.gov/api/stn.aspx?cmd=stninfo&orig=${from}&key=${apikey}`;
+    return `http://api.bart.gov/api/stn.aspx?cmd=stninfo&orig=${from}&key=${appConsts.apiKey}`;
   },
 
   stationUrl () {
-    return `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${apikey}`;
+    return `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${appConsts.apiKey}`;
   },
 
   getBlobType (blob, url) {
@@ -68,7 +70,7 @@ const appFuncs = {
       warn: 'warn',
     };
 
-    return bypass ?
+    return bypass || !appConsts.isProd ?
       prod[type] || notprod[type] :
       prod[type];
   },

@@ -9,8 +9,7 @@
  */
 
 /* eslint-disable indent */
-require('../.globals/constants.js');
-require('../.globals/functions.js');
+require('../.globals');
 import Promised from 'bluebird';
 import Idbstore from 'serviceworkers/idb/idb';
 
@@ -18,11 +17,11 @@ const db = new Idbstore('udacity', 'cache');
 db.dbPromise.then(
   () => {
     appFuncs.consoleThis(db, 'dir');
-    if (db.success) appFuncs.consoleThis(db.success);
+    if (db.success) appFuncs.consoleThis(`db instantiated successfully: ${db.success}`);
     else appFuncs.consoleThis('db did not successfully instantiate', 'error');
   },
   (bad) => {
-    appFuncs.consoleThis(bad, 'dir');
+    appFuncs.consoleThis(bad, 'dir', true);
     appFuncs.consoleThis('db rejected on instantiation', 'error');
   }
 );
@@ -31,10 +30,6 @@ db.dbPromise.then(
 self.addEventListener('install', (event) => {
   const urlsToPrefetch = [
     "/",
-    // css files
-    // font files
-    // images
-    // etc
   ];
 
   /**
@@ -117,7 +112,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
-      appFuncs.consoleThis('responding from cache', event.request.url, contentType, blobFound.size);
+      appFuncs.consoleThis(`responding from cache: ${event.request.url}, ${contentType}, ${blobFound.size}`);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),

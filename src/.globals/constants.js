@@ -5,8 +5,10 @@
  */
 const appConsts = {
   apiKey: 'Z44S-5LSG-9QVT-DWE9',
-  isProd: process.env.NODE_ENV === 'production',
   appVersion: 0,
+  dbName: 'udacity',
+  initialStore: 'cache',
+  isProd: process.env.NODE_ENV === 'production',
 }
 /**
  * Set global variables on worker & main threads, else node

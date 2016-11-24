@@ -13,18 +13,19 @@ require('../.globals');
 import Promised from 'bluebird';
 import Idbstore from 'serviceworkers/idb/idb';
 
-const db = new Idbstore('udacity', 'cache');
-db.dbPromise.then(
-  () => {
-    appFuncs.consoleThis(db, 'dir');
-    if (db.success) appFuncs.consoleThis(`db instantiated successfully: ${db.success}`);
-    else appFuncs.consoleThis('db did not successfully instantiate', 'error');
-  },
-  (bad) => {
-    appFuncs.consoleThis(bad, 'dir', true);
-    appFuncs.consoleThis('db rejected on instantiation', 'error');
-  }
-);
+const db = new Idbstore();
+appFuncs.console('table')(db);
+db.dbPromise
+  .then(
+    (thisDb) => {
+      if (db.success) appFuncs.console()(`db instantiated successfully: ${thisDb}`);
+      else appFuncs.console('error')('db did not successfully instantiate');
+    },
+    (bad) => {
+      appFuncs.console('dir', true)(bad);
+      appFuncs.console('error')('db rejected on instantiation');
+    }
+  );
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -41,7 +42,7 @@ self.addEventListener('install', (event) => {
         .then((resp) =>
           resp.blob()
             .then((blob) => {
-              appFuncs.consoleThis(`blob is: ${blob.size}, ${blob.type}`, 'info');
+              appFuncs.console('info')(`blob is: ${blob.size}, ${blob.type}`);
 
               return db.set(prefetchThisUrl, blob);
             })
@@ -51,11 +52,11 @@ self.addEventListener('install', (event) => {
     if (complete.length)
       resolve(complete);
     else {
-      appFuncs.consoleThis(`did not complete fetching: ${complete.length}`, 'error');
+      appFuncs.console('error')(`did not complete fetching: ${complete.length}`);
       reject();
     }
   })
-    .catch((addAllError) => appFuncs.consoleThis(`error in adding prefetch urls: ${addAllError}`, 'error'))
+    .catch((addAllError) => appFuncs.console('error')(`error in adding prefetch urls: ${addAllError}`))
   );
 });
 
@@ -71,10 +72,11 @@ self.addEventListener('fetch', (event) => {
     // wtf is up with caching svgs ?
     'https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
+    'http://localhost:3000/js/bundle.js', // always update bundle
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
-    appFuncs.consoleThis(`not caching: ${event.request.url} `);
+    appFuncs.console()(`not caching: ${event.request.url} `);
 
     return event.respondWith(fetch(event.request));
   }
@@ -82,12 +84,12 @@ self.addEventListener('fetch', (event) => {
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
-        appFuncs.consoleThis(`content not found in DB, requesting from the matrix`, 'info');
+        appFuncs.console('info')(`content not found in DB, requesting from the matrix`);
 
         return fetch(event.request.clone())
           .then((response) => {
             if (!response) {
-              appFuncs.consoleThis(`received invalid response from fetch: ${response}`);
+              appFuncs.console()(`received invalid response from fetch: ${response}`);
 
               return reject(response);
             }
@@ -95,16 +97,16 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                appFuncs.consoleThis(`updating db with: ${JSON.stringify(event.request.clone().url)}`, 'info');
+                appFuncs.console('info')(`updating db with: ${JSON.stringify(event.request.clone().url)}`);
                 db.set(
                   event.request.url,
                   blob
                 ).then(
-                  (success) => appFuncs.consoleThis(`success in setting: ${success}`),
-                  (error) => appFuncs.consoleThis(`error in setting: ${error}`, 'error')
+                  (success) => appFuncs.console()(`success in setting: ${success}`),
+                  (error) => appFuncs.console('error')(`error in setting: ${error}`)
                 );
               },
-              (noBlob) => appFuncs.consoleThis(`blob not generated from cloned response:${noBlob}`)
+              (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)
             );
 
             return resolve(response);
@@ -112,7 +114,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
-      appFuncs.consoleThis(`responding from cache: ${event.request.url}, ${contentType}, ${blobFound.size}`);
+      appFuncs.console()(`responding from cache: ${event.request.url}, ${contentType}, ${blobFound.size}`);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),
@@ -156,14 +158,14 @@ self.addEventListener('activate', (event) => {
 */
 
 self.addEventListener('sync', (event) => {
-  appFuncs.consoleThis(`sync event: ${JSON.stringify(event)}`);
+  appFuncs.console()(`sync event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('push', (event) => {
-  appFuncs.consoleThis(`push event: ${JSON.stringify(event)}`);
+  appFuncs.console()(`push event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('message', (event) => {
   // event.data === whatever sent from Client.postMessage
-  appFuncs.consoleThis(`message event: ${JSON.stringify(event)}`);
+  appFuncs.console()(`message event: ${JSON.stringify(event)}`);
 });

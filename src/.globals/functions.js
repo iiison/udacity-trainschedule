@@ -48,7 +48,6 @@ const appFuncs = {
       dir: 'dir',
       error: 'error',
       exception: 'exception',
-      info: 'info',
       trace: 'trace',
     };
 
@@ -60,6 +59,7 @@ const appFuncs = {
       group: 'group',
       groupCollapsed: 'groupCollapsed',
       groupEnd: 'groupEnd',
+      info: 'info',
       log: 'log',
       profile: 'profile',
       profileEnd: 'profileEnd',
@@ -78,18 +78,18 @@ const appFuncs = {
   /**
   * consoles data dependent on env
   * @see https://developer.mozilla.org/en-US/docs/Web/API/Console
-  * @method consoleThis
+  * @method console
   * @param  {*}    data something to console
   * @param  {String}    [type='log']   console method to use
   * @param  {Boolean}   [bypass=false] should we bypass env check
-  * @return {Boolean} if the console was successful
+  * @return {Function} console.method or null function
   */
-  consoleThis (data, type = 'log', bypass = false) {
+  console (type = 'log', bypass = false) {
     const thisType = this.consoleTypes(type, bypass);
 
     return thisType ?
-      console[thisType](data) : // eslint-disable-line no-console
-      false;
+      console[thisType] : // eslint-disable-line no-console
+      () => null;
   },
 }
 /**

@@ -15,10 +15,6 @@ import IdbKeyval from 'serviceworkers/idb/idb';
 import * as consts from 'constants.js';
 
 const db = new IdbKeyval('udacity', 'cache');
-console.log(db.dbPromise.then(
-  (suc) => console.info(`success in creating: ${suc}`),
-  (err) => console.error(`error in creating: ${err}`)
-));
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -44,7 +40,7 @@ self.addEventListener('install', (event) => {
               .then((blob) => {
                 console.log(`text is: ${blob.size}, ${blob.type}`);
 
-                return db.set(prefetchThisUrl, blob);
+                return db.set && db.set(prefetchThisUrl, blob);
               });
           });
     });

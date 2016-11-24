@@ -10,7 +10,8 @@ import Popup from 'react-popup';
 import React from 'react';
 import Stationinfo from 'components/stationinfo/stationinfo.js';
 import styles from './start.css';
-// import IdbKeyval from 'serviceworkers/idb/idb';
+// now using my github:noahehall/idb#isomorphic-imports
+import idbstore from 'serviceworkers/idb/idb';
 
 class Start extends React.Component {
   static propTypes = {
@@ -37,11 +38,10 @@ class Start extends React.Component {
     if (!this.props.randomSchedule)
       this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
 
-    if (window.indexedDB && window.IDBIndex) {
-      console.log('found db!');
-      // const db = new IdbKeyval('udacity', 'cache');
-      // console.log(IdbKeyval);
-    } else console.log('db not found!');
+    if (window.indexedDB && window.IDBIndex)
+      // var IdbKeyval = require('serviceworkers/idb/idb'); // eslint-disable-line
+      console.log('found db!', idbstore);
+    else console.log('db not found!');
   }
 
   componentWillReceiveProps (nextProps) {

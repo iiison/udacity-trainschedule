@@ -2,7 +2,6 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Table } from 'reactabular';
 import * as actionCreators from 'store/actions/index.js';
-import * as consts from 'constants.js';
 import * as dom from 'lib/dom.js';
 import * as forms from 'components/forms/forms.js';
 import * as time from 'lib/time.js';
@@ -36,12 +35,12 @@ class Start extends React.Component {
     // get stations
 
     if (!this.props.randomSchedule)
-      this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
+      this.props.dispatch.getBart({ type: 'stations', url: appFuncs.stationUrl() });
 
     if (Idbstore) {
       // const db = new Idbstore('udacity', 'cache');
-      // console.log(db);
-    } else console.log('db not found!');
+      // appFuncs.consoleThis(db);
+    } else appFuncs.consoleThis('db not found!');
   }
 
   componentWillReceiveProps (nextProps) {
@@ -73,7 +72,7 @@ class Start extends React.Component {
         toAbbr = to.abbr[0];
 
       // get random schedule
-      const url = consts.scheduleUrl({
+      const url = appFuncs.scheduleUrl({
         from: fromAbbr,
         scheduleConfigDepartBool,
         to: toAbbr,
@@ -142,7 +141,7 @@ class Start extends React.Component {
       thisDate = dateTime.substring(0, dateTime.indexOf(' ')).trim(),
       thisTime = dateTime.substring(dateTime.indexOf(' ')).trim();
 
-    const url = consts.scheduleUrl({
+    const url = appFuncs.scheduleUrl({
       date: thisDate,
       from: fromAbbr,
       scheduleConfigDepartBool,
@@ -173,9 +172,9 @@ class Start extends React.Component {
       e.preventDefault();
       e.stopPropagation();
 
-      return latestStation === consts.stationUrl() ?
+      return latestStation === appFuncs.stationUrl() ?
         false :
-        this.props.dispatch.getBart({ type: 'stations', url: consts.stationUrl() });
+        this.props.dispatch.getBart({ type: 'stations', url: appFuncs.stationUrl() });
     }
 
     let stations;
@@ -218,7 +217,7 @@ class Start extends React.Component {
         station.name[0] === e.currentTarget.value
       ).abbr[0] }`;
 
-      url = consts.stationInfoUrl({ from: abbr });
+      url = appFuncs.stationInfoUrl({ from: abbr });
     } catch (err) {
       abbr = abbr || '';
     } finally {
@@ -272,7 +271,7 @@ class Start extends React.Component {
     }
 
     if (abbr) {
-      const url = consts.stationInfoUrl({ from: abbr });
+      const url = appFuncs.stationInfoUrl({ from: abbr });
       let stationExtraInfo;
       try {
         stationExtraInfo = this.props.stationInfo.data[url];

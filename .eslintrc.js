@@ -219,7 +219,16 @@ module.exports = {
     "no-class-assign": 0,
     "no-cond-assign": 0,
     "no-confusing-arrow": [1, {"allowParens": true}],
-    "no-console": 1,
+    "no-console": [2, {
+      allow: [
+        "debug",
+        "dir",
+        "error",
+        "exception",
+        "info",
+        "trace"
+      ]
+    }],
     "no-const-assign": 2,
     "no-constant-condition": 2,
     "no-continue": 0,

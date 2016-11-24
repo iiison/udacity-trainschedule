@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+require('./.globals/constants.js');
+require('./.globals/functions.js');
 import { renderToString } from 'react-dom/server';
 import { RouterContext, match } from 'react-router';
 import express from 'express';
@@ -15,18 +17,17 @@ import spdy from 'spdy';
 import { Provider } from 'react-redux';
 import configure from './store/configure';
 
-const isProd = process.env.NODE_ENV === "production";
 const port = 3000;
 
 // https: only in production
 const options = {
   cert: fs.readFileSync(`${__dirname}/server/localhost-cert.pem`),
   key: fs.readFileSync(`${__dirname}/server/localhost-key.pem`),
-  plain: !isProd,
+  plain: !appConsts.isProd,
   spdy: {
-    plain: !isProd,
+    plain: !appConsts.isProd,
     protocols: [ 'h2', 'spdy/3.1', 'spdy/3', 'spdy/2', 'http/1.1', 'http/1.0' ],
-    ssl: isProd
+    ssl: appConsts.isProd
   }
 };
 
@@ -135,10 +136,10 @@ app.get("*", (req, res) => {
 spdy.createServer(options, app)
   .listen(port, (error) => { // eslint-disable-line consistent-return
     if (error) {
-      console.error('error occured in spdy', error);
+      appFuncs.consoleThis(`error occured in spdy: ${error}`, 'error');
 
       return process.exit(1);
     }
 
-    console.log(`Server running: ${isProd ? 'https://localhost' : 'http:://127.0.0.1'}:${port}`);
+    appFuncs.consoleThis(`Server running: ${!appConsts.isProd ? 'https://localhost' : 'http://127.0.0.1'}:${port}`, 'info', true);
   });

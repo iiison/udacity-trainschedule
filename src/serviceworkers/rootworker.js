@@ -9,21 +9,21 @@
  */
 
 /* eslint-disable indent */
-
+require('../.globals/constants.js');
+require('../.globals/functions.js');
 import Promised from 'bluebird';
 import Idbstore from 'serviceworkers/idb/idb';
-import * as consts from 'constants.js';
 
 const db = new Idbstore('udacity', 'cache');
 db.dbPromise.then(
   () => {
-    console.dir(db);
-    if (db.success) console.log(db.success);
-    else('db is not successful')
+    appFuncs.consoleThis(db, 'dir');
+    if (db.success) appFuncs.consoleThis(db.success);
+    else appFuncs.consoleThis('db did not successfully instantiate', 'error');
   },
   (bad) => {
-    console.dir(bad)
-    console.error(`db failed to instantiate2`);
+    appFuncs.consoleThis(bad, 'dir');
+    appFuncs.consoleThis('db rejected on instantiation', 'error');
   }
 );
 
@@ -46,7 +46,7 @@ self.addEventListener('install', (event) => {
         .then((resp) =>
           resp.blob()
             .then((blob) => {
-              console.info(`blob is: ${blob.size}, ${blob.type}`);
+              appFuncs.consoleThis(`blob is: ${blob.size}, ${blob.type}`, 'info');
 
               return db.set(prefetchThisUrl, blob);
             })
@@ -56,11 +56,11 @@ self.addEventListener('install', (event) => {
     if (complete.length)
       resolve(complete);
     else {
-      console.error(`did not complete fetching: ${complete.length}`);
+      appFuncs.consoleThis(`did not complete fetching: ${complete.length}`, 'error');
       reject();
     }
   })
-    .catch((addAllError) => console.error(`error in adding prefetch urls: ${addAllError}`))
+    .catch((addAllError) => appFuncs.consoleThis(`error in adding prefetch urls: ${addAllError}`, 'error'))
   );
 });
 
@@ -79,20 +79,20 @@ self.addEventListener('fetch', (event) => {
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
-    console.log(`not caching: ${event.request.url} `);
+    appFuncs.consoleThis(`not caching: ${event.request.url} `);
 
     return event.respondWith(fetch(event.request));
   }
 
-  event.respondWith(new Promised((resolve, reject) => {
+  return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
-        console.info(`content not found in DB, requesting from the matrix`);
+        appFuncs.consoleThis(`content not found in DB, requesting from the matrix`, 'info');
 
         return fetch(event.request.clone())
           .then((response) => {
             if (!response) {
-              console.error(`received invalid response from fetch: ${response}`);
+              appFuncs.consoleThis(`received invalid response from fetch: ${response}`);
 
               return reject(response);
             }
@@ -100,24 +100,24 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                console.info(`updating db with: ${JSON.stringify(event.request.clone().url)}`);
+                appFuncs.consoleThis(`updating db with: ${JSON.stringify(event.request.clone().url)}`, 'info');
                 db.set(
                   event.request.url,
                   blob
                 ).then(
-                  (success) => console.log(`success in setting: ${success}`),
-                  (error) => console.error(`error in setting: ${error}`)
+                  (success) => appFuncs.consoleThis(`success in setting: ${success}`),
+                  (error) => appFuncs.consoleThis(`error in setting: ${error}`, 'error')
                 );
               },
-              (noBlob) => console.error(`blob not generated from cloned response:${noBlob}`)
+              (noBlob) => appFuncs.consoleThis(`blob not generated from cloned response:${noBlob}`)
             );
 
             return resolve(response);
           });
       }
 
-      const contentType = consts.getBlobType(blobFound, event.request.url);
-      console.log('responding from cache', event.request.url, contentType, blobFound.size);
+      const contentType = appFuncs.getBlobType(blobFound, event.request.url);
+      appFuncs.consoleThis('responding from cache', event.request.url, contentType, blobFound.size);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),
@@ -161,14 +161,14 @@ self.addEventListener('activate', (event) => {
 */
 
 self.addEventListener('sync', (event) => {
-  console.log(`sync event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`sync event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('push', (event) => {
-  console.log(`push event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`push event: ${JSON.stringify(event)}`);
 });
 
 self.addEventListener('message', (event) => {
   // event.data === whatever sent from Client.postMessage
-  console.log(`message event: ${JSON.stringify(event)}`);
+  appFuncs.consoleThis(`message event: ${JSON.stringify(event)}`);
 });

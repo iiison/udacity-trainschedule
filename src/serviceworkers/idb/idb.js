@@ -1,7 +1,7 @@
 import idb from 'idb';
 import * as consts from 'constants.js';
 
-export class idbKeyval {
+export class Idbstore {
   constructor (dbName, initialStore) {
     this.dbName = dbName;
     this.store = `${initialStore}${consts.CACHE_VERSION}`;
@@ -13,11 +13,10 @@ export class idbKeyval {
         const neededVer = consts.CACHE_VERSION;
 
         // works for creating stores starting at index 0 and no stores exist
+        // check upgraeDB.objectStoreNames and set this logic correctly
         let idx = Number(neededVer) > Number(curVer) ?
           curVer :
-          (neededVer - curVer) === curVer ?
-            0 :
-            0;
+          0;
         if (curVer === idx && idx !== 0) idx++;
 
         console.log(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}, names ${JSON.stringify(upgradeDB.objectStoreNames)}`);
@@ -81,4 +80,4 @@ export class idbKeyval {
   }
 }
 
-export default idbKeyval;
+export default Idbstore;

@@ -11,10 +11,10 @@
 /* eslint-disable indent */
 
 import Promised from 'bluebird';
-import IdbKeyval from 'serviceworkers/idb/idb';
+import Idbstore from 'serviceworkers/idb/idb';
 import * as consts from 'constants.js';
 
-const db = new IdbKeyval('udacity', 'cache');
+const db = new Idbstore('udacity', 'cache');
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
@@ -70,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   } else event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
-        console.info(`content fot found in DB, requesting from the matrix`);
+        console.info(`content not found in DB, requesting from the matrix`);
 
         return fetch(event.request.clone())
           .then((response) => {

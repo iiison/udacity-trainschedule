@@ -10,7 +10,7 @@ export class idbKeyval {
       consts.CACHE_VERSION || 1,
       (upgradeDB) => {
         const curVer = upgradeDB.oldVersion;
-        const neededVer = consts.CACHE_VERSION || 1;
+        const neededVer = consts.CACHE_VERSION;
 
         // works for creating stores starting at index 0 and no stores exist
         let idx = Number(neededVer) > Number(curVer) ?
@@ -22,7 +22,7 @@ export class idbKeyval {
 
         console.log(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}, names ${JSON.stringify(upgradeDB.objectStoreNames)}`);
         while (idx <= neededVer) {
-          console.log(`idx in loop: ${idx}, ${upgradeDB.objectStoreNames[idx]}`)
+          console.log(`idx in loop: ${idx}, ${upgradeDB.objectStoreNames[idx]}`);
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
         }
       }
@@ -57,11 +57,11 @@ export class idbKeyval {
     return this.dbPromise.then((db) => {
       const tx = db.transaction(store);
       const keys = [];
-      const store = tx.objectStore(store);
+      const thisStore = tx.objectStore(store);
 
       // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
       // openKeyCursor isn't supported by Safari, so we fall back
-      (store.iterateKeyCursor || store.iterateCursor).call(store, (cursor) => {
+      (thisStore.iterateKeyCursor || thisStore.iterateCursor).call(thisStore, (cursor) => {
         if (!cursor) return;
         keys.push(cursor.key);
         cursor.continue();

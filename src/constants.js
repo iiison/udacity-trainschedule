@@ -15,4 +15,14 @@ export const stationInfoUrl = ({ from }) =>
 export const stationUrl = () =>
   `http://api.bart.gov/api/stn.aspx?cmd=stns&key=${apikey}`;
 
-export const CACHE_VERSION = 3;
+export const CACHE_VERSION = 0;
+
+export const getBlobType = (blob, url) =>
+  url.includes('http://fonts.googleapis.com/css') ?
+    // http://stackoverflow.com/questions/2871655/proper-mime-type-for-fonts
+    'text/css' :
+    url.includes('https://travis-ci.org/noahehall/udacity-trainschedule.svg') ?
+      'image/svg+xml' :
+      blob.type ?
+        blob.type :
+        'text/html';

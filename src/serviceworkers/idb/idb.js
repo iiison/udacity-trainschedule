@@ -6,30 +6,32 @@ import idb from 'idb';
  */
 export class Idbstore {
   constructor (dbName = appConsts.dbName, initialStore = appConsts.initialStore) {
+    this.success = false;
+    this.error = false;
     this.dbName = dbName;
     // 0 indexed
-    this.store = `${initialStore}${appConsts.appVersion - 1}`;
+    this.store = `${initialStore}${appConsts.appVersion ? appConsts.appVersion - 1 : 0}`;
     this.dbPromise = idb.open(
       this.dbName,
       appConsts.appVersion,
       (upgradeDB) => {
-        const curVer = upgradeDB.oldVersion;
         // 1 indexed
-        const neededVer = appConsts.appVersion;
-        const curStores = upgradeDB.objectStoreNames || [];
-        let idx = curStores.length || 0;
+        let idx = upgradeDB.objectStoreNames ?
+          upgradeDB.objectStoreNames.length :
+          0;
 
-        appFuncs.console('info')(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}`);
-        while (idx < neededVer) {
-          appFuncs.console()(`idx in loop: ${idx}, ${curStores[idx]}`);
+        appFuncs.console('info')(`oldVersion: ${upgradeDB.oldVersion}, appVersion: ${appConsts.appVersion}, idx: ${idx}`);
+        while (idx < appConsts.appVersion)
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
-        }
       }
     ).then(
-      (good) => good,
+      (good) => {
+        this.success = true;
+
+        return good;
+      },
       (bad) => this.error = bad
     ).catch((err) => this.catch = err);
-    this.success = true;
   }
 
   clear (store = this.store) {
@@ -56,6 +58,12 @@ export class Idbstore {
     );
   }
 
+  getAll () {
+    return this.dbPromise.then((db) =>
+      db.transaction(this.store).objectStore(this.store).getAll())
+      .then((allObjs) => allObjs);
+  }
+
   keys (store = this.store) {
     return this.dbPromise.then((db) => {
       const tx = db.transaction(store);
@@ -80,12 +88,6 @@ export class Idbstore {
 
       return tx.complete;
     });
-  }
-
-  getAll () {
-    return this.dbPromise.then((db) =>
-      db.transaction(this.store).objectStore(this.store).getAll())
-      .then((allObjs) => allObjs);
   }
 }
 

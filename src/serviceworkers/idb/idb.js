@@ -5,7 +5,7 @@ import idb from 'idb';
  * @class idbKeyval
  */
 export class idbKeyval {
-  constructor (dbName, initialStore) {
+  constructor (dbName = appConsts.dbName, initialStore = appConsts.initialStore) {
     this.dbName = dbName;
     this.store = `${initialStore}${appConsts.appVersion}`;
     this.dbPromise = idb.open(
@@ -21,9 +21,9 @@ export class idbKeyval {
           0;
         if (curVer === idx && idx !== 0) idx++;
 
-        appFuncs.consoleThis(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}, names ${JSON.stringify(upgradeDB.objectStoreNames)}`);
+        appFuncs.console()(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}, names ${JSON.stringify(upgradeDB.objectStoreNames)}`);
         while (idx <= neededVer) {
-          appFuncs.consoleThis(`idx in loop: ${idx}, ${upgradeDB.objectStoreNames[idx]}`);
+          appFuncs.console()(`idx in loop: ${idx}, ${upgradeDB.objectStoreNames[idx]}`);
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
         }
       }

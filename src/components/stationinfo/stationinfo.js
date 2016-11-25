@@ -29,7 +29,7 @@ export const Stationinfo = ({ name, abbr, city, zipcode, address, stationExtraIn
     // southRoutes = station.south_routes[0];
   } catch (err) {
     // do nothing
-    appFuncs.consoleThis(`error instation info ${err}`);
+    appFuncs.console()(`error instation info ${err}`);
   }
 
   return <div>

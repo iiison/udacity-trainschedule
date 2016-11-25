@@ -73,25 +73,25 @@ const serviceWorkerFileOptions = {
 app.get('/container.js', (req, res) => {
   res.sendFile('./container.js', serviceWorkerFileOptions, (err) => {
     if (err) {
-      console.log(err);
+      appFuncs.console('error')(err);
       res.status(err.status).end();
-    } else console.log('Sent: container.js');
+    } else appFuncs.console()('Sent: container.js');
   });
 });
 
 app.get('/rootworker.js', (req, res) => {
   res.sendFile('./rootworker.js', serviceWorkerFileOptions, (err) => {
     if (err) {
-      console.log(err);
+      appFuncs.console('error')(err);
       res.status(err.status).end();
-    } else console.log('Sent: rootworker.js');
+    } else appFuncs.console()('Sent: rootworker.js');
   });
 });
 
 app.get("*", (req, res) => {
   match({ location: req.url, routes }, (err, redirectLocation, renderProps) => {
     if (err) {
-      console.error(err);
+      appFuncs.console('error')(err);
 
       return res.status(500).end('Internal server error');
     }
@@ -135,10 +135,10 @@ app.get("*", (req, res) => {
 spdy.createServer(options, app)
   .listen(port, (error) => { // eslint-disable-line consistent-return
     if (error) {
-      appFuncs.consoleThis(`error occured in spdy: ${error}`, 'error');
+      appFuncs.console('error')(`error occured in spdy: ${error}`);
 
       return process.exit(1);
     }
 
-    appFuncs.consoleThis(`Server running: ${!appConsts.isProd ? 'https://localhost' : 'http://127.0.0.1'}:${port}`, 'info', true);
+    appFuncs.console('info')(`Server running: ${!appConsts.isProd ? 'https://localhost' : 'http://127.0.0.1'}:${port}`);
   });

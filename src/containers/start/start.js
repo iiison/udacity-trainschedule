@@ -38,9 +38,15 @@ class Start extends React.Component {
       this.props.dispatch.getBart({ type: 'stations', url: appFuncs.stationUrl() });
 
     if (Idbstore) {
-      // const db = new Idbstore('udacity', 'cache');
-      // appFuncs.consoleThis(db);
-    } else appFuncs.consoleThis('db not found!');
+      const db = new Idbstore();
+
+      db.dbPromise
+        .then(
+          (thisDb) => thisDb,
+          (bad) => appFuncs.console('table')(bad)
+        );
+      appFuncs.console('table')(db);
+    } else appFuncs.console()('db not found!');
   }
 
   componentWillReceiveProps (nextProps) {

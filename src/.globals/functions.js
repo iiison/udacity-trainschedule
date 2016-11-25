@@ -1,6 +1,7 @@
 /**
  * Functions made available to the entire application
  * @see https://www.hacksparrow.com/global-variables-in-node-js.html
+ * @author @noahehall
  * @type {Object}
  */
 require('./constants.js');
@@ -48,7 +49,6 @@ const appFuncs = {
       dir: 'dir',
       error: 'error',
       exception: 'exception',
-      info: 'info',
       trace: 'trace',
     };
 
@@ -60,6 +60,7 @@ const appFuncs = {
       group: 'group',
       groupCollapsed: 'groupCollapsed',
       groupEnd: 'groupEnd',
+      info: 'info',
       log: 'log',
       profile: 'profile',
       profileEnd: 'profileEnd',
@@ -71,25 +72,28 @@ const appFuncs = {
     };
 
     return bypass || !appConsts.isProd ?
-      prod[type] || notprod[type] :
+      notprod[type] || prod[type] :
       prod[type];
   },
 
   /**
   * consoles data dependent on env
   * @see https://developer.mozilla.org/en-US/docs/Web/API/Console
-  * @method consoleThis
+  * @method console
   * @param  {*}    data something to console
   * @param  {String}    [type='log']   console method to use
   * @param  {Boolean}   [bypass=false] should we bypass env check
-  * @return {Boolean} if the console was successful
+  * @return {Function} console.method, console.log, or null function
   */
-  consoleThis (data, type = 'log', bypass = false) {
+  console (type = 'log', bypass = false) {
     const thisType = this.consoleTypes(type, bypass);
 
-    return thisType ?
-      console[thisType](data) : // eslint-disable-line no-console
-      false;
+    if (thisType) {
+      if (console[thisType]) return console[thisType];
+      if (console.log) return console.log; // eslint-disable-line no-console
+    }
+
+    return () => null;
   },
 }
 /**

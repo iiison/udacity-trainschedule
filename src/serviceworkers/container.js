@@ -17,10 +17,10 @@ if ('serviceWorker' in navigator) {
       if (reg.installing) {
         const sw = reg.installing;
         sw.postMessage(`installed worker message`);
-        appFuncs.consoleThis(`state is installing ${JSON.stringify(sw)}`);
+        appFuncs.console()(`state is installing ${JSON.stringify(sw)}`);
       } else if (reg.waiting) {
         const sw = reg.waiting;
-        appFuncs.consoleThis(`state is waiting ${JSON.stringify(sw)},`);
+        appFuncs.console()(`state is waiting ${JSON.stringify(sw)}`);
       }
 
     // reg.installing is now the current worker
@@ -28,20 +28,20 @@ if ('serviceWorker' in navigator) {
       // whenever sw.state changes
         reg.installing.addEventListener('statechange', () => {
           if (reg.state === 'installed')
-            appFuncs.consoleThis(`please refresh your browser! ${JSON.stringify(reg)}`);
+            appFuncs.console()(`please refresh your browser! ${JSON.stringify(reg)}`);
         });
       });
     })
   // registration failed
     .catch((error) => {
-      appFuncs.consoleThis(`Registration failed: ${error}`, 'error');
+      appFuncs.console('error')(`Registration failed: ${error}`);
     });
 
   // the controlling service worker has changed
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    appFuncs.consoleThis('controller has changed, reload');
+    appFuncs.console()('controller has changed, reload');
     // reload the page if the user has consented, if not ask for permission
     // for some changes (e.g. minor, or security fixes) you may want to force changes to users
     window.location.reload();
   });
-} else appFuncs.consoleThis('Your browser does not offline apps :( try switching to chrome, firefox, or opera)', 'info');
+} else appFuncs.console('Your browser does not offline apps :( try switching to chrome, firefox, or opera)', 'info');

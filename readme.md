@@ -5,7 +5,7 @@ This application is based on [this boilerplate project](https://github.com/noahe
 
 # Quick start
   - $ npm install #install all required npm modules
-  - $ npm run start #start app on localhost:3000,
+  - $ npm run dev #start app on localhost:3000,
   - $ npm run prod #make product build in /dist
   - $ npm run test #test all test.js files within src/*
   - $ npm run eslint-unused #see all eslint rules not defined in .eslintrc

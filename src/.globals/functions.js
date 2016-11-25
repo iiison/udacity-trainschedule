@@ -1,6 +1,7 @@
 /**
  * Functions made available to the entire application
  * @see https://www.hacksparrow.com/global-variables-in-node-js.html
+ * @author @noahehall
  * @type {Object}
  */
 require('./constants.js');
@@ -71,7 +72,7 @@ const appFuncs = {
     };
 
     return bypass || !appConsts.isProd ?
-      prod[type] || notprod[type] :
+      notprod[type] || prod[type] :
       prod[type];
   },
 
@@ -82,14 +83,17 @@ const appFuncs = {
   * @param  {*}    data something to console
   * @param  {String}    [type='log']   console method to use
   * @param  {Boolean}   [bypass=false] should we bypass env check
-  * @return {Function} console.method or null function
+  * @return {Function} console.method, console.log, or null function
   */
   console (type = 'log', bypass = false) {
     const thisType = this.consoleTypes(type, bypass);
 
-    return thisType ?
-      console[thisType] : // eslint-disable-line no-console
-      () => null;
+    if (thisType) {
+      if (console[thisType]) return console[thisType];
+      if (console.log) return console.log; // eslint-disable-line no-console
+    }
+
+    return () => null;
   },
 }
 /**

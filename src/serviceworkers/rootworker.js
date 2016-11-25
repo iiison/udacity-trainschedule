@@ -18,7 +18,7 @@ appFuncs.console('table')(db);
 db.dbPromise
   .then(
     (thisDb) => {
-      if (db.success) appFuncs.console()(`db instantiated successfully: ${thisDb}`);
+      if (db.success) appFuncs.console('table')(thisDb);
       else appFuncs.console('error')('db did not successfully instantiate');
     },
     (bad) => {

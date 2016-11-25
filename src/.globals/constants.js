@@ -1,6 +1,7 @@
 /**
  * Constants made available to entire application
  * @see https://www.hacksparrow.com/global-variables-in-node-js.html
+ * @author @noahehall
  * @type {Object}
  */
 const appConsts = {

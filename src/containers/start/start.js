@@ -42,11 +42,12 @@ class Start extends React.Component {
 
       db.dbPromise
         .then(
-          (thisDb) => thisDb,
+          (thisDb) => {
+            appFuncs.console('table')(thisDb.objectStoreNames);
+          },
           (bad) => appFuncs.console('table')(bad)
         );
-      appFuncs.console('table')(db);
-    } else appFuncs.console()('db not found!');
+    } else appFuncs.console('info')('db not found!');
   }
 
   componentWillReceiveProps (nextProps) {

@@ -41,7 +41,7 @@ const appFuncs = {
   * @method consoleTypes
   * @param  {String}     type   type of console request
   * @param  {boolean}     bypass whether to bypass environment check
-  * @return {String}     the request console method
+  * @return {String|undefined} the requested console method or undefined
   */
   consoleTypes (type, bypass) {
     const prod = {
@@ -89,7 +89,7 @@ const appFuncs = {
     const thisType = this.consoleTypes(type, bypass);
 
     if (thisType) {
-      if (console[thisType]) return console[thisType];
+      if (console[thisType]) return console[thisType]; // eslint-disable-line no-console
       if (console.log) return console.log; // eslint-disable-line no-console
     }
 

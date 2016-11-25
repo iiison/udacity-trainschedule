@@ -7,23 +7,21 @@ import idb from 'idb';
 export class idbKeyval {
   constructor (dbName = appConsts.dbName, initialStore = appConsts.initialStore) {
     this.dbName = dbName;
-    this.store = `${initialStore}${appConsts.appVersion}`;
+    // 0 indexed
+    this.store = `${initialStore}${appConsts.appVersion - 1}`;
     this.dbPromise = idb.open(
       this.dbName,
-      appConsts.appVersion || 1,
+      appConsts.appVersion,
       (upgradeDB) => {
         const curVer = upgradeDB.oldVersion;
-        const neededVer = appConsts.appVersion || 1;
+        // 1 indexed
+        const neededVer = appConsts.appVersion;
+        const curStores = upgradeDB.objectStoreNames || [];
+        let idx = curStores.length || 0;
 
-        // works for creating stores starting at index 0 and no stores exist
-        let idx = Number(neededVer) > Number(curVer) ?
-          curVer :
-          0;
-        if (curVer === idx && idx !== 0) idx++;
-
-        appFuncs.console()(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}, names ${JSON.stringify(upgradeDB.objectStoreNames)}`);
-        while (idx <= neededVer) {
-          appFuncs.console()(`idx in loop: ${idx}, ${upgradeDB.objectStoreNames[idx]}`);
+        appFuncs.console()(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}`);
+        while (idx < neededVer) {
+          appFuncs.console()(`idx in loop: ${idx}, ${curStores[idx]}`);
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
         }
       }

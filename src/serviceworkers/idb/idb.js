@@ -1,10 +1,10 @@
 import idb from 'idb';
 
 /**
- * Connect to indexeddb
- * @class idbKeyval
+ * Wrapper around jake's idb for connecting to indexdb
+ * @class Idbstore
  */
-export class idbKeyval {
+export class Idbstore {
   constructor (dbName = appConsts.dbName, initialStore = appConsts.initialStore) {
     this.dbName = dbName;
     // 0 indexed
@@ -19,7 +19,7 @@ export class idbKeyval {
         const curStores = upgradeDB.objectStoreNames || [];
         let idx = curStores.length || 0;
 
-        appFuncs.console()(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}`);
+        appFuncs.console('info')(`curVer: ${curVer}, neededVer: ${neededVer}, idx: ${idx}`);
         while (idx < neededVer) {
           appFuncs.console()(`idx in loop: ${idx}, ${curStores[idx]}`);
           upgradeDB.createObjectStore(`${initialStore}${idx++}`);
@@ -61,7 +61,6 @@ export class idbKeyval {
       const tx = db.transaction(store);
       const keys = [];
       const thisStore = tx.objectStore(store);
-
       // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
       // openKeyCursor isn't supported by Safari, so we fall back
       (thisStore.iterateKeyCursor || thisStore.iterateCursor).call(store, (cursor) => {
@@ -82,6 +81,12 @@ export class idbKeyval {
       return tx.complete;
     });
   }
+
+  getAll () {
+    return this.dbPromise.then((db) =>
+      db.transaction(this.store).objectStore(this.store).getAll())
+      .then((allObjs) => allObjs);
+  }
 }
 
-export default idbKeyval;
+export default Idbstore;

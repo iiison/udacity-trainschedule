@@ -39,11 +39,14 @@ class Start extends React.Component {
 
     if (Idbstore) {
       const db = new Idbstore();
+      // this works
+      db.getAll()
+        .then((objs) => appFuncs.console('table')(objs));
 
       db.dbPromise
         .then(
           (thisDb) => {
-            appFuncs.console('table')(thisDb.objectStoreNames);
+            appFuncs.console('table')(thisDb);
           },
           (bad) => appFuncs.console('table')(bad)
         );

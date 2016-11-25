@@ -10,9 +10,9 @@
     "url": "https://github.com/noahehall/udacity-trainschedule.git"
   },
   "scripts": {
-    "prestart": "npm run eslint-fix",
     "start": "./node_modules/.bin/gulp",
-    "preprod": "npm run eslint-fix",
+    "security": "./node_modules/.bin/nsp check",
+    "dev": "npm run security && npm run eslint-fix && npm run start",
     "prod": "NODE_ENV=production ./node_modules/.bin/gulp prod && node dist/server.js",
     "prebuild": "npm run eslint-fix",
     "build": "NODE_ENV=production ./node_modules/.bin/gulp prod",
@@ -98,6 +98,7 @@
     "loose-envify": "^1.2.0",
     "mocha": "^3.0.2",
     "nodemon": "^1.9.2",
+    "nsp": "^2.6.2",
     "postcss-advanced-variables": "^1.2.2",
     "postcss-cssnext": "^2.7.0",
     "postcss-extend": "^1.0.5",

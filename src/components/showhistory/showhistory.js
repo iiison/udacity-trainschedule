@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './showhistory.css';
 import url from 'url';
 
-export const getHistory = (data = {}) => {
+export const getHistory = (data = {}, dispatch) => {
   const history = [];
 
   if (data.schedules)
@@ -16,12 +16,13 @@ export const getHistory = (data = {}) => {
               const queryString = url.parse(thisUrl, true).query;
 
               return (
-                <div key={`schedules${idx}`}>
+                <section key={`schedules${idx}`}>
                   From: {queryString.orig} <br />
                   To: {queryString.dest} <br />
                   Date: {queryString.date} <br />
                   {queryString.time && `Time: ${queryString.time}`}
-                </div>
+                  <div><button onClick={() => dispatch.urlCache('schedules', thisUrl)}>Get Info</button></div>
+                </section>
               );
             })
         }
@@ -32,7 +33,7 @@ export const getHistory = (data = {}) => {
 };
 
 export const ShowHistory = ({ data, dispatch }) => { // eslint-disable-line no-unused-vars
-  const history = getHistory(data);
+  const history = getHistory(data, dispatch);
 
 
   return history.length ?

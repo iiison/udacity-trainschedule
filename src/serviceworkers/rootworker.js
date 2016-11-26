@@ -113,7 +113,7 @@ self.addEventListener('fetch', (event) => {
             return resolve(response);
           });
 
-      // blob not found logic
+      // blob found logic
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
       appFuncs.console()(`responding from cache: ${event.request.url}, contentType: ${contentType}, size: ${blobFound.size}`);
 

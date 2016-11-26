@@ -1,25 +1,31 @@
 import React from 'react';
 import styles from './showhistory.css';
-export const getHistory = (data = {}) => {
+import url from 'url';
+
+export const getHistory = (data = {}, dispatch) => {
   const history = [];
 
   if (data.schedules)
     history.push(
       <div className='history-list' key='schedules'>
         <h3>Schedules</h3>
-        {appFuncs
-          .uniqueArray(data.schedules)
-          .map((url, idx) => <div key={`schedules${idx}`}>{url}</div>)}
-      </div>
-    );
+        {
+          appFuncs
+            .uniqueArray(data.schedules)
+            .map((thisUrl, idx) => {
+              const queryString = url.parse(thisUrl, true).query;
 
-  if (data.stationInfo)
-    history.push(
-      <div className='history-list' key='stations'>
-        <h3>Stations</h3>
-        {appFuncs
-          .uniqueArray(data.stationInfo)
-          .map((url, idx) => <div key={`stations${idx}`}>{url}</div>)}
+              return (
+                <section key={`schedules${idx}`}>
+                  From: {queryString.orig} <br />
+                  To: {queryString.dest} <br />
+                  Date: {queryString.date} <br />
+                  {queryString.time && `Time: ${queryString.time}`}
+                  <div><button onClick={() => dispatch.urlCache('schedules', thisUrl)}>Get Info</button></div>
+                </section>
+              );
+            })
+        }
       </div>
     );
 
@@ -27,7 +33,7 @@ export const getHistory = (data = {}) => {
 };
 
 export const ShowHistory = ({ data, dispatch }) => { // eslint-disable-line no-unused-vars
-  const history = getHistory(data);
+  const history = getHistory(data, dispatch);
 
 
   return history.length ?

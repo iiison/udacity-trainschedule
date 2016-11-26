@@ -68,7 +68,11 @@ self.addEventListener('fetch', (event) => {
     // wtf is up with caching svgs ?
     'https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
-    'http://localhost:3000/js/bundle.js', // always update bundle
+    // always update bundle
+    'http://localhost:3000/js/bundle.js',
+    // logrocket doesnt work if returned from indexedb
+    // 'https://cdn.logrocket.com/LogRocket.min.js',
+    // 'https://logrocket-1356.appspot.com/v1/ingest',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
@@ -93,14 +97,17 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                appFuncs.console('info')(`updating db with: ${JSON.stringify(event.request.url)}`);
-                db.set(
-                  event.request.url,
-                  blob
-                ).then(
-                  (success) => appFuncs.console()(`success in setting: ${success}`),
-                  (error) => appFuncs.console('error')(`error in setting: ${error}`)
-                );
+                if (blob.size) {
+                  appFuncs.console('info')(`updating db with: $event.request.url}`);
+                  db.set(
+                    event.request.url,
+                    blob
+                  ).then(
+                    (success) => appFuncs.console()(`success in setting: ${success}`),
+                    (error) => appFuncs.console('error')(`error in setting: ${error}`)
+                  );
+                } else
+                    appFuncs.console('warn')(`not updating db with: ${event.request.url} because blob size is 0`);
               },
               (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)
             );

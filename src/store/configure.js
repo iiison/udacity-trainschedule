@@ -14,8 +14,7 @@ export default (initialState) => {
     thunk,
   ];
 
-  const isProd = process.env.NODE_ENV === "production";
-  const reduxTools = !isProd &&
+  const reduxTools = !appConsts.isProd &&
     typeof window !== 'undefined' &&
     window.devToolsExtension ?
       window.devToolsExtension() :
@@ -26,7 +25,7 @@ export default (initialState) => {
     (f) => f;
 
   // all non production middlewares
-  if (!isProd) {
+  if (!appConsts.isProd) {
     const loggerMiddleware = createLogger({
       collapsed: true,
       duration: true,
@@ -39,7 +38,7 @@ export default (initialState) => {
   }
 
   // all production only middle wares
-  if (isProd) {
+  if (appConsts.isProd) {
     // do nothing
   }
 

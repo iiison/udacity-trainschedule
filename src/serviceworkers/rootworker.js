@@ -28,9 +28,8 @@ self.addEventListener('install', (event) => {
   const urlsToPrefetch = [
     '/',
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
-    'https://cdn.logrocket.com/LogRocket.min.js',
-    'https://logrocket-1356.appspot.com/v1/ingest',
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
+    'https://cdn.logrocket.com/LogRocket.min.js',
   ];
 
   /**
@@ -68,13 +67,22 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
     'http://localhost:3000/js/bundle.js',
+    // 'https://logrocket-1356.appspot.com/v1/ingest', // handled by neverCacheHttpMethods
   ];
 
-  if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
-    appFuncs.console()(`not caching: ${event.request.url} `);
+  const neverCacheHttpMethods = [
+    'POST'
+  ];
 
+  // never cache urls
+  if (neverCacheUrls.indexOf(event.request.clone().url) > -1)
+     // appFuncs.console()(`not caching url: ${event.request.url} `);
     return event.respondWith(fetch(event.request));
-  }
+
+  // never cache http methods
+  if (neverCacheHttpMethods.indexOf(event.request.clone().method) > -1)
+    // appFuncs.console()(`not caching http method: ${event.request.url}, ${event.request.clone().method} `);
+    return event.respondWith(fetch(event.request));
 
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {

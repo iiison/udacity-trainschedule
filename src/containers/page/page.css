@@ -2,6 +2,8 @@
 
 body {
   font-family: Muli, Eczar;
+  src: url('Muli') format('font/woff2');
+  src: url('Eczar') format('font/woff2');
   font-size: 20px;
 }
 
@@ -12,6 +14,8 @@ body {
   & .navbar {
     background-color: buttonface;
     font-family: Varela Round, Muli;
+    src: url('Varela Round') format('font/woff2');
+    src: url('Muli') format('font/woff2');
     height: 75px;
     list-style-type: none;
     margin: 0;

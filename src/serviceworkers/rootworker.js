@@ -70,9 +70,6 @@ self.addEventListener('fetch', (event) => {
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     // always update bundle
     'http://localhost:3000/js/bundle.js',
-    // logrocket doesnt work if returned from indexedb
-    // 'https://cdn.logrocket.com/LogRocket.min.js',
-    // 'https://logrocket-1356.appspot.com/v1/ingest',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
@@ -84,8 +81,6 @@ self.addEventListener('fetch', (event) => {
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
-        appFuncs.console('info')(`content not found in DB, requesting from the matrix`);
-
         return fetch(event.request.clone())
           .then((response) => {
             if (!response) {
@@ -98,16 +93,19 @@ self.addEventListener('fetch', (event) => {
             response.clone().blob().then(
               (blob) => {
                 if (blob.size) {
-                  appFuncs.console('info')(`updating db with: $event.request.url}`);
-                  db.set(
+                  appFuncs.console('info')(`updating db with: ${event.request.url}`);
+
+                  return db.set(
                     event.request.url,
                     blob
                   ).then(
-                    (success) => appFuncs.console()(`success in setting: ${success}`),
+                    (success) => success,
                     (error) => appFuncs.console('error')(`error in setting: ${error}`)
                   );
-                } else
-                    appFuncs.console('warn')(`not updating db with: ${event.request.url} because blob size is 0`);
+                }
+
+                // never insert blobs with 0 bytes, e.g. logRocket
+                return false;
               },
               (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)
             );
@@ -115,9 +113,8 @@ self.addEventListener('fetch', (event) => {
             return resolve(response);
           });
       }
-
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
-      appFuncs.console()(`responding from cache, contentType: ${contentType}, size: ${blobFound.size}`);
+      appFuncs.console()(`responding from cache: ${event.request.url}, contentType: ${contentType}, size: ${blobFound.size}`);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),

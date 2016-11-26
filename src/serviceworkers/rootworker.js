@@ -92,7 +92,7 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                if (blob.size) {
+                if (blob) {
                   appFuncs.console('info')(`updating db with: ${event.request.url}`);
 
                   return db.set(

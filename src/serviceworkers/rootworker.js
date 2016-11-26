@@ -80,7 +80,7 @@ self.addEventListener('fetch', (event) => {
 
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
-      if (!blobFound) {
+      if (!blobFound)
         return fetch(event.request.clone())
           .then((response) => {
             if (!response) {
@@ -112,7 +112,8 @@ self.addEventListener('fetch', (event) => {
 
             return resolve(response);
           });
-      }
+
+      // blob not found logic
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
       appFuncs.console()(`responding from cache: ${event.request.url}, contentType: ${contentType}, size: ${blobFound.size}`);
 

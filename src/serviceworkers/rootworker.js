@@ -95,16 +95,19 @@ self.addEventListener('fetch', (event) => {
             response.clone().blob().then(
               (blob) => {
                 if (blob.size) {
-                  appFuncs.console('info')(`updating db with: $event.request.url}`);
-                  db.set(
+                  appFuncs.console('info')(`updating db with: ${event.request.url}`);
+
+                  return db.set(
                     event.request.url,
                     blob
                   ).then(
                     (success) => appFuncs.console()(`success in setting: ${success}`),
                     (error) => appFuncs.console('error')(`error in setting: ${error}`)
                   );
-                } else // never insert blobs with 0 bytes, e.g. logRocket
-                    appFuncs.console('warn')(`not updating db with: ${event.request.url} because blob size is ${blob.size}`);
+                }
+
+                // never insert blobs with 0 bytes, e.g. logRocket
+                return false;
               },
               (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)
             );

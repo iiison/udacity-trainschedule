@@ -21,6 +21,11 @@ export default (initialState) => {
       window.devToolsExtension() :
       (f) => f;
 
+  if (typeof LogRocket !== 'undefined') {
+    appFuncs.console('dir')(LogRocket);
+    middleWares.push(LogRocket.reduxEnhancer());
+  }
+
   // all non production middlewares
   if (!isProd) {
     const loggerMiddleware = createLogger({

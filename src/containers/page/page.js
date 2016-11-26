@@ -32,7 +32,7 @@ class Page extends React.Component {
           script={[
             { src: 'https://cdn.logrocket.com/LogRocket.min.js', type: 'text/javascript' },
             {
-              innerHTML: "LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: true })",
+              innerHTML: "if (typeof LogRocket !== 'undefined') { LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: true }); }",
               type: 'text/javascript',
             }
           ]}

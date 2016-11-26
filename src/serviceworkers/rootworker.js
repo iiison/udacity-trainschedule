@@ -103,6 +103,7 @@ self.addEventListener('fetch', (event) => {
                     (error) => appFuncs.console('error')(`error in setting: ${error}`)
                   );
                 }
+                appFuncs.console('warn')(`blob.size is falsy: ${event.request.url}, blob.size: ${blob.size}`);
 
                 // never insert blobs with 0 bytes, e.g. logRocket
                 return false;

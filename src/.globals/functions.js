@@ -108,6 +108,18 @@ const appFuncs = {
     }
 
     return () => null;
+  },
+
+  /**
+   * gets the unique values from an array
+   * @method uniqueArray
+   * @param {Array} [array=[]] non empty array
+   * @returns {Array} filled with unique values
+   */
+  uniqueArray (array = []) {
+    return Array.isArray(array) && array.length ?
+     [...new Set(array)] :
+     [];
   }
 }
 /**

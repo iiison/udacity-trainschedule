@@ -10,7 +10,10 @@ export function urlCache (state = Immutable({}), action) {
   return action.type === 'UPDATE_URL_CACHE' ?
     Immutable({
       ...state,
-      [action.key]: [ action.url, ...state[action.key] ],
+                    // puts it at end
+      [action.key]: action.modifier ?
+        [ ...state[action.key], action.url ] :
+        [ action.url, ...state[action.key] ],
     }) :
     state;
 }

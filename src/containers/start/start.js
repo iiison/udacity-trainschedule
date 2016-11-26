@@ -40,7 +40,13 @@ class Start extends React.Component {
     if (Idbstore) {
       const db = new Idbstore();
 
-      appFuncs.console('dir')(db.getKeysMatching(undefined, 'http://api.bart.gov/'));
+      db.getKeysMatching(undefined, 'http://api.bart.gov/')
+        .then(
+          (keysArray) => db.get(keysArray[0])
+            .then((blob) =>
+              appFuncs.console('dir')(db.fileReader(blob))
+            )
+        );
     } else appFuncs.console('info')('db not found!');
   }
 

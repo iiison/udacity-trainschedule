@@ -113,16 +113,19 @@ export class Idbstore {
    */
   fileReader (blobOrFile) {
     if (FileReader)
-      return new Promised((resolve) => {
+      return new Promised((resolve, reject) => { // eslint-disable-line consistent-return
+        if (!(blobOrFile instanceof Blob || blobOrFile instanceof File))
+          return reject(new Error(`blobOrFile is of incorrect type: ${blobOrFile.constructor}, ${blobOrFile}`));
+
         const thisReader = new FileReader();
-        thisReader.addEventListener("loadend", () => {
-          resolve(thisReader.result);
-        });
+        thisReader.addEventListener("loadend", () =>
+          resolve(thisReader.result)
+        );
 
         thisReader.readAsText(blobOrFile);
       });
 
-    return null;
+    return Promise.reject(new Error('FileReader is not available'));
   }
 
   /**

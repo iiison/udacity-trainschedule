@@ -222,10 +222,8 @@ module.exports = {
     "no-console": [2, {
       allow: [
         "debug",
-        "dir",
         "error",
         "exception",
-        "info",
         "trace"
       ]
     }],

@@ -59,7 +59,7 @@ export class Idbstore {
 
   /**
    * get a single object from store
-   * @method
+   * @method get
    * @param  {[type]} key                [description]
    * @param  {[type]} [store=this.store] [description]
    * @return {[type]} [description]
@@ -83,12 +83,35 @@ export class Idbstore {
   }
 
   /**
+   * Returns all keys matching the string
+   * @param {String} [store=this.store] The object store name
+   * @param {String} [string='http'] The string to match against
+   * @returns {Promise} possibly resolving to an array filled with key names
+   */
+  getKeysMatching (store = this.store, string = 'http') {
+    return this.dbPromise.then((db) => {
+      const tx = db.transaction(store);
+      const thisStore = tx.objectStore(store);
+
+      return thisStore.getAllKeys()
+        .then(
+          (allKeys) =>
+            allKeys.filter((thisKey) =>
+              thisKey.includes(string)
+          ),
+          (someError) => appFuncs.console('error')(someError)
+        );
+    });
+  }
+
+  /**
    * reads data from a blob
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Blob
    * @see https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-   * @returns {Promise} data from blob
+   * @param {Blob|File} blobOrFile a blob or file object
+   * @returns {Promise} data from blobOrFile
    */
-  fileReader (blob) {
+  fileReader (blobOrFile) {
     if (FileReader)
       return new Promised((resolve) => {
         const thisReader = new FileReader();
@@ -96,7 +119,7 @@ export class Idbstore {
           resolve(thisReader.result);
         });
 
-        thisReader.readAsText(blob);
+        thisReader.readAsText(blobOrFile);
       });
 
     return null;
@@ -116,18 +139,20 @@ export class Idbstore {
     return this.dbPromise.then((db) =>
       db.transaction(this.store).objectStore(this.store).getAll())
       .then((allBlobs) => {
-        allBlobs.forEach((blob) => {
-          blobs.push(this.fileReader(blob));
-          // const thisUrl = (URL && URL.createObjectURL(blob)) || '';
-          // appFuncs.console('dir')(blob);
-          // appFuncs.console()(`this url: ${thisUrl}, matching: ${url}`);
-          // if (thisUrl.includes(url)) matchingBlobs.push(blob);
-        });
+        allBlobs.forEach((blob) =>
+          blobs.push(this.fileReader(blob))
+        );
 
         return blobs;
       });
   }
 
+  /**
+   * Gets all key values from Objecstore
+   * @method keys
+   * @param {String} [store=this.store] the store name
+   * @returns {Array} all key values
+   */
   keys (store = this.store) {
     return this.dbPromise.then((db) => {
       const tx = db.transaction(store);

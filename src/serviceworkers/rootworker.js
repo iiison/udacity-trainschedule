@@ -81,8 +81,6 @@ self.addEventListener('fetch', (event) => {
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound) {
-        appFuncs.console('info')(`content not found in DB, requesting from the matrix`);
-
         return fetch(event.request.clone())
           .then((response) => {
             if (!response) {
@@ -101,7 +99,7 @@ self.addEventListener('fetch', (event) => {
                     event.request.url,
                     blob
                   ).then(
-                    (success) => appFuncs.console()(`success in setting: ${success}`),
+                    (success) => success,
                     (error) => appFuncs.console('error')(`error in setting: ${error}`)
                   );
                 }
@@ -115,9 +113,8 @@ self.addEventListener('fetch', (event) => {
             return resolve(response);
           });
       }
-
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
-      appFuncs.console()(`responding from cache, contentType: ${contentType}, size: ${blobFound.size}`);
+      appFuncs.console()(`responding from cache: ${event.request.url}, contentType: ${contentType}, size: ${blobFound.size}`);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),

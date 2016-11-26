@@ -21,10 +21,9 @@ export default (initialState) => {
       window.devToolsExtension() :
       (f) => f;
 
-  if (typeof LogRocket !== 'undefined') {
-    appFuncs.console('dir')(LogRocket);
-    middleWares.push(LogRocket.reduxEnhancer());
-  }
+  const logRocketReducer = typeof LogRocket !== 'undefined' ?
+    LogRocket.reduxEnhancer() :
+    (f) => f;
 
   // all non production middlewares
   if (!isProd) {
@@ -54,7 +53,8 @@ export default (initialState) => {
       applyMiddleware(
         ...middleWares
       ),
-      reduxTools
+      reduxTools,
+      logRocketReducer
     )
   );
 };

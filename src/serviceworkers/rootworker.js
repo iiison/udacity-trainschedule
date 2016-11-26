@@ -29,7 +29,6 @@ self.addEventListener('install', (event) => {
     '/',
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
     'https://cdn.logrocket.com/LogRocket.min.js',
-    'https://logrocket-1356.appspot.com/v1/ingest',
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
   ];
 
@@ -68,6 +67,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
     'http://localhost:3000/js/bundle.js',
+    'https://logrocket-1356.appspot.com/v1/ingest',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {

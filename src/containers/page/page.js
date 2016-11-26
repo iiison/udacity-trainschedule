@@ -31,8 +31,9 @@ class Page extends React.Component {
           ]}
           script={[
             { src: 'https://cdn.logrocket.com/LogRocket.min.js', type: 'text/javascript' },
+            // to log session urls in production console.log(LogRocket.recordingURL);
             {
-              innerHTML: "if (typeof LogRocket !== 'undefined') { LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: true }); }",
+              innerHTML: `if (typeof LogRocket !== 'undefined') { LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: ${!appConsts.isProd && true} }); }`,
               type: 'text/javascript',
             }
           ]}

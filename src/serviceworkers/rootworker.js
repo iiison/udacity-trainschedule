@@ -70,9 +70,6 @@ self.addEventListener('fetch', (event) => {
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     // always update bundle
     'http://localhost:3000/js/bundle.js',
-    // logrocket doesnt work if returned from indexedb
-    // 'https://cdn.logrocket.com/LogRocket.min.js',
-    // 'https://logrocket-1356.appspot.com/v1/ingest',
   ];
 
   if (neverCacheUrls.indexOf(event.request.clone().url) > -1) {
@@ -106,8 +103,8 @@ self.addEventListener('fetch', (event) => {
                     (success) => appFuncs.console()(`success in setting: ${success}`),
                     (error) => appFuncs.console('error')(`error in setting: ${error}`)
                   );
-                } else
-                    appFuncs.console('warn')(`not updating db with: ${event.request.url} because blob size is 0`);
+                } else // never insert blobs with 0 bytes, e.g. logRocket
+                    appFuncs.console('warn')(`not updating db with: ${event.request.url} because blob size is ${blob.size}`);
               },
               (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)
             );

@@ -40,13 +40,31 @@ class Start extends React.Component {
     if (Idbstore) {
       const db = new Idbstore();
 
-      // get all bart urls and their xml values
+      // get all bart urls and hydrate store
       db.getKeysMatching(undefined, 'http://api.bart.gov/')
-        .then((keysArray) => keysArray.map((key) => ({
-          blob: db.get(key).then((blob) => db.fileReader(blob)),
-          key })
-        ))
-        .then((blobArray) => appFuncs.console('dir')(blobArray)
+
+        /* get the actual values from indexeddb
+          .then((keysArray) => keysArray.map((key) => ({
+            blob: db.get(key).then((blob) => db.fileReader(blob)),
+            key })
+          ))
+        */
+        .then((keysArray) => keysArray.forEach((key) => {
+          if (key.includes('http://api.bart.gov/api/sched.aspx'))
+            return this.props.dispatch.getBart({
+              hydrate: true,
+              type: 'schedules',
+              url: key,
+            });
+          if (key.includes('http://api.bart.gov/api/stn.aspx'))
+            return this.props.dispatch.getBart({
+              hydrate: true,
+              type: 'stationInfo',
+              url: key,
+            });
+
+          return null;
+        })
       );
     } else appFuncs.console('info')('db not found!');
   }

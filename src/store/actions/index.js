@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { parseString } from 'xml2js';
 
-export function urlCache (key, url) {
+export function urlCache (key, url, modifier) {
   return {
     key,
+    modifier,
     type: 'UPDATE_URL_CACHE',
     url,
   };
@@ -73,6 +74,7 @@ export function gotStationInfo ({
 }
 
 export function getBart ({
+  hydrate = false,
   type,
   url,
 }) {
@@ -113,7 +115,7 @@ export function getBart ({
         } catch (err2) {
           const urlCacheKey = type;
 
-          if (urlCacheKey) dispatch(urlCache(urlCacheKey, url));
+          if (urlCacheKey) dispatch(urlCache(urlCacheKey, url, hydrate));
 
           return dispatch(functionName({
             data: result.root || err2,

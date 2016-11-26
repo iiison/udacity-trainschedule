@@ -10,6 +10,7 @@ const appConsts = {
   dbName: 'udacity',
   initialStore: 'cache',
   isProd: process.env.NODE_ENV === 'production',
+  rollbarKey: '5bbeb743444848b780d254e98fa04e5e',
 }
 /**
  * Set global variables on worker & main threads, else node

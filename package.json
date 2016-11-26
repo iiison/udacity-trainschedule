@@ -48,6 +48,7 @@
     "redux-promise": "^0.5.3",
     "redux-seamless-immutable": "^0.3.0",
     "redux-thunk": "^2.1.0",
+    "rollbar": "^0.6.3",
     "seamless-immutable": "^6.3.0",
     "spdy": "^3.4.4",
     "st-input-moment": "^0.3.3",

@@ -21,6 +21,10 @@ export default (initialState) => {
       window.devToolsExtension() :
       (f) => f;
 
+  const logRocketReducer = typeof LogRocket !== 'undefined' ?
+    LogRocket.reduxEnhancer() :
+    (f) => f;
+
   // all non production middlewares
   if (!isProd) {
     const loggerMiddleware = createLogger({
@@ -49,7 +53,8 @@ export default (initialState) => {
       applyMiddleware(
         ...middleWares
       ),
-      reduxTools
+      reduxTools,
+      logRocketReducer
     )
   );
 };

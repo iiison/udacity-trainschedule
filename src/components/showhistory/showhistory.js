@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from './showhistory.css';
+import url from 'url';
+
 export const getHistory = (data = {}) => {
   const history = [];
 
@@ -7,19 +9,22 @@ export const getHistory = (data = {}) => {
     history.push(
       <div className='history-list' key='schedules'>
         <h3>Schedules</h3>
-        {appFuncs
-          .uniqueArray(data.schedules)
-          .map((url, idx) => <div key={`schedules${idx}`}>{url}</div>)}
-      </div>
-    );
+        {
+          appFuncs
+            .uniqueArray(data.schedules)
+            .map((thisUrl, idx) => {
+              const queryString = url.parse(thisUrl, true).query;
 
-  if (data.stationInfo)
-    history.push(
-      <div className='history-list' key='stations'>
-        <h3>Stations</h3>
-        {appFuncs
-          .uniqueArray(data.stationInfo)
-          .map((url, idx) => <div key={`stations${idx}`}>{url}</div>)}
+              return (
+                <div key={`schedules${idx}`}>
+                  From: {queryString.orig} <br />
+                  To: {queryString.dest} <br />
+                  Date: {queryString.date} <br />
+                  {queryString.time && `Time: ${queryString.time}`}
+                </div>
+              );
+            })
+        }
       </div>
     );
 

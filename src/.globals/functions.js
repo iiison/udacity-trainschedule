@@ -46,7 +46,6 @@ const appFuncs = {
   consoleTypes (type, bypass) {
     const prod = {
       debug: 'debug',
-      dir: 'dir',
       error: 'error',
       exception: 'exception',
       trace: 'trace',
@@ -56,6 +55,7 @@ const appFuncs = {
       assert: 'assert',
       clear: 'clear',
       count: 'count',
+      dir: 'dir',
       dirxml: 'dirxml',
       group: 'group',
       groupCollapsed: 'groupCollapsed',

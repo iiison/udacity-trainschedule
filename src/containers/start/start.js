@@ -38,8 +38,9 @@ class Start extends React.Component {
       this.props.dispatch.getBart({ type: 'stations', url: appFuncs.stationUrl() });
 
     if (Idbstore) {
-      // const db = new Idbstore();
+      const db = new Idbstore();
 
+      appFuncs.console('dir')(db.getKeysMatching(undefined, 'http://api.bart.gov/'));
     } else appFuncs.console('info')('db not found!');
   }
 

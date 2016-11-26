@@ -43,6 +43,7 @@ function renderFullPage (html, preloadedState) {
         ${head.title}
         ${head.meta}
         ${head.link}
+        ${head.script}
       </head>
       <body>
         <div id="root">${html}</div>

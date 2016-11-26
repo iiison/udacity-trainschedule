@@ -29,7 +29,14 @@ class Page extends React.Component {
             { content: 'React F Your Starterkit by @noahedwardhall', name: 'description' },
             { content: 'Home', property: 'og:title' },
           ]}
-          title='React For Your Starterkit'
+          script={[
+            { src: 'https://cdn.logrocket.com/LogRocket.min.js', type: 'text/javascript' },
+            {
+              innerHTML: "LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: true })",
+              type: 'text/javascript',
+            }
+          ]}
+          title='For Your Progressive React Starterkit'
         />
         <style scoped type='text/css'>{styles}</style>
         <ul className='navbar'>

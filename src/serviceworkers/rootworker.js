@@ -26,7 +26,11 @@ db.dbPromise
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
   const urlsToPrefetch = [
-    "/",
+    '/',
+    'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
+    'https://cdn.logrocket.com/LogRocket.min.js',
+    'https://logrocket-1356.appspot.com/v1/ingest',
+    'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
   ];
 
   /**
@@ -34,7 +38,7 @@ self.addEventListener('install', (event) => {
    */
   event.waitUntil(new Promised((resolve, reject) => {
     const complete = urlsToPrefetch.map((prefetchThisUrl) =>
-      fetch(new Request(prefetchThisUrl, { mode: 'no-cors' }))
+      fetch(new Request(prefetchThisUrl))
         .then((resp) =>
           resp.blob()
             .then((blob) => {
@@ -63,12 +67,6 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
-    // wtf is up with this mime type?
-    'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
-    // wtf is up with caching svgs ?
-    'https://travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
-    'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
-    // always update bundle
     'http://localhost:3000/js/bundle.js',
   ];
 
@@ -81,7 +79,7 @@ self.addEventListener('fetch', (event) => {
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
       if (!blobFound)
-        return fetch(event.request.clone())
+        return fetch(event.request.clone().url)
           .then((response) => {
             if (!response) {
               appFuncs.console()(`received invalid response from fetch: ${response}`);
@@ -104,7 +102,7 @@ self.addEventListener('fetch', (event) => {
                   );
                 }
 
-                // never insert blobs with 0 bytes, e.g. logRocket
+                // never insert blobs with 0 bytes
                 return false;
               },
               (noBlob) => appFuncs.console()(`blob not generated from cloned response:${noBlob}`)

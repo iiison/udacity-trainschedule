@@ -5,12 +5,13 @@ import * as actionCreators from 'store/actions/index.js';
 import * as dom from 'lib/dom.js';
 import * as forms from 'components/forms/forms.js';
 import * as time from 'lib/time.js';
-import Popup from 'react-popup';
-import React from 'react';
-import Stationinfo from 'components/stationinfo/stationinfo.js';
-import styles from './start.css';
 // now using my github:noahehall/idb#isomorphic-imports
 import Idbstore from 'serviceworkers/idb/idb';
+import Popup from 'react-popup';
+import React from 'react';
+import ShowHistory from 'components/showhistory/showhistory';
+import Stationinfo from 'components/stationinfo/stationinfo.js';
+import styles from './start.css';
 
 class Start extends React.Component {
   static propTypes = {
@@ -42,13 +43,6 @@ class Start extends React.Component {
 
       // get all bart urls and hydrate store
       db.getKeysMatching(undefined, 'http://api.bart.gov/')
-
-        /* get the actual values from indexeddb
-          .then((keysArray) => keysArray.map((key) => ({
-            blob: db.get(key).then((blob) => db.fileReader(blob)),
-            key })
-          ))
-        */
         .then((keysArray) => keysArray.forEach((key) => {
           if (key.includes('http://api.bart.gov/api/sched.aspx'))
             return this.props.dispatch.getBart({
@@ -474,6 +468,11 @@ class Start extends React.Component {
             status
           })}
         </section>
+        <ShowHistory
+          data={this.props.urls}
+          dispatch={this.props.dispatch}
+          type='schedules'
+        />
       </div>
     );
   }

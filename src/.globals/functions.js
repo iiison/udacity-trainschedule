@@ -95,6 +95,20 @@ const appFuncs = {
 
     return () => null;
   },
+
+  rollbar (type = 'reportMessage') {
+    if (typeof XMLHttpRequest !== undefined) {
+
+      if (!this.rb) {
+        this.rb = require('rollbar');
+        this.rb.init(appConsts.rollbarKey);
+      }
+
+      if (this.rb[type]) return this.rb[type];
+    }
+
+    return () => null;
+  }
 }
 /**
  * Set global variables on worker & main threads, else node

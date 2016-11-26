@@ -1,21 +1,25 @@
 import React from 'react';
-
+import styles from './showhistory.css';
 export const getHistory = (data = {}) => {
   const history = [];
 
   if (data.schedules)
     history.push(
-      <div key='schedules'>
+      <div className='history-list' key='schedules'>
         <h3>Schedules</h3>
-        {appFuncs.uniqueArray(data.schedules)}
+        {appFuncs
+          .uniqueArray(data.schedules)
+          .map((url, idx) => <div key={`schedules${idx}`}>{url}</div>)}
       </div>
     );
 
   if (data.stationInfo)
     history.push(
-      <div key='Stations'>
+      <div className='history-list' key='stations'>
         <h3>Stations</h3>
-        {appFuncs.uniqueArray(data.stationInfo)}
+        {appFuncs
+          .uniqueArray(data.stationInfo)
+          .map((url, idx) => <div key={`stations${idx}`}>{url}</div>)}
       </div>
     );
 
@@ -28,6 +32,7 @@ export const ShowHistory = ({ data, dispatch }) => { // eslint-disable-line no-u
 
   return history.length ?
     <section>
+      <style scoped type='text/css'>{styles}</style>
       <h2>History</h2>
       {history}
     </section> :

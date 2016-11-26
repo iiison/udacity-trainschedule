@@ -38,18 +38,8 @@ class Start extends React.Component {
       this.props.dispatch.getBart({ type: 'stations', url: appFuncs.stationUrl() });
 
     if (Idbstore) {
-      const db = new Idbstore();
-      // this works
-      db.getAll()
-        .then((objs) => appFuncs.console('table')(objs));
+      // const db = new Idbstore();
 
-      db.dbPromise
-        .then(
-          (thisDb) => {
-            appFuncs.console('table')(thisDb);
-          },
-          (bad) => appFuncs.console('table')(bad)
-        );
     } else appFuncs.console('info')('db not found!');
   }
 

@@ -14,13 +14,9 @@ import Promised from 'bluebird';
 import Idbstore from 'serviceworkers/idb/idb';
 
 const db = new Idbstore();
-appFuncs.console('table')(db);
 db.dbPromise
   .then(
-    (thisDb) => {
-      if (db.success) appFuncs.console('table')(thisDb);
-      else appFuncs.console('error')('db did not successfully instantiate');
-    },
+    (thisDb) => thisDb,
     (bad) => {
       appFuncs.console('dir', true)(bad);
       appFuncs.console('error')('db rejected on instantiation');
@@ -97,7 +93,7 @@ self.addEventListener('fetch', (event) => {
             // insert response body in db
             response.clone().blob().then(
               (blob) => {
-                appFuncs.console('info')(`updating db with: ${JSON.stringify(event.request.clone().url)}`);
+                appFuncs.console('info')(`updating db with: ${JSON.stringify(event.request.url)}`);
                 db.set(
                   event.request.url,
                   blob
@@ -114,7 +110,7 @@ self.addEventListener('fetch', (event) => {
       }
 
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
-      appFuncs.console()(`responding from cache: ${event.request.url}, ${contentType}, ${blobFound.size}`);
+      appFuncs.console()(`responding from cache, contentType: ${contentType}, size: ${blobFound.size}`);
 
       const myHeaders = {
         "Content-Length": String(blobFound.size),

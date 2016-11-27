@@ -28,6 +28,10 @@ self.addEventListener('install', (event) => {
   const urlsToPrefetch = [
     '/',
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
+    'http://localhost:3000/container.js',
+    'http://localhost:3000/favicon.ico',
+    'http://localhost:3000/js/bundle.js ',
+    'http://localhost:3000/rootworker.js',
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     'https://cdn.logrocket.com/LogRocket.min.js',
   ];
@@ -66,7 +70,7 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
-    'http://localhost:3000/js/bundle.js',
+    // 'http://localhost:3000/js/bundle.js',
     // 'https://logrocket-1356.appspot.com/v1/ingest', // handled by neverCacheHttpMethods
   ];
 

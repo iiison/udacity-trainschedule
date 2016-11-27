@@ -25,13 +25,14 @@ db.dbPromise
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
+  const protocol = self.location.protocol;
   const urlsToPrefetch = [
     '/',
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
-    'http://localhost:3000/container.js',
-    'http://localhost:3000/favicon.ico',
-    'http://localhost:3000/js/bundle.js ',
-    'http://localhost:3000/rootworker.js',
+    `${protocol}//localhost:3000/container.js`,
+    `${protocol}//localhost:3000/favicon.ico`,
+    `${protocol}//localhost:3000/js/bundle.js`,
+    `${protocol}//localhost:3000/rootworker.js`,
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     'https://cdn.logrocket.com/LogRocket.min.js',
   ];
@@ -41,7 +42,7 @@ self.addEventListener('install', (event) => {
    */
   event.waitUntil(new Promised((resolve, reject) => {
     const complete = urlsToPrefetch.map((prefetchThisUrl) =>
-      fetch(new Request(prefetchThisUrl))
+      navigator.onLine && fetch(new Request(prefetchThisUrl))
         .then((resp) =>
           resp.blob()
             .then((blob) => {
@@ -70,7 +71,7 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
-    // 'http://localhost:3000/js/bundle.js',
+    // `${protocol}://localhost:3000/js/bundle.js`,
     // 'https://logrocket-1356.appspot.com/v1/ingest', // handled by neverCacheHttpMethods
   ];
 
@@ -79,18 +80,20 @@ self.addEventListener('fetch', (event) => {
   ];
 
   // never cache urls
-  if (neverCacheUrls.indexOf(event.request.clone().url) > -1)
+  if (navigator.onLine && neverCacheUrls.indexOf(event.request.clone().url) > -1)
      // appFuncs.console()(`not caching url: ${event.request.url} `);
     return event.respondWith(fetch(event.request));
 
   // never cache http methods
-  if (neverCacheHttpMethods.indexOf(event.request.clone().method) > -1)
+  if (navigator.onLine && neverCacheHttpMethods.indexOf(event.request.clone().method) > -1)
     // appFuncs.console()(`not caching http method: ${event.request.url}, ${event.request.clone().method} `);
     return event.respondWith(fetch(event.request));
 
   return event.respondWith(new Promised((resolve, reject) => {
     db.get(event.request.url).then((blobFound) => {
-      if (!blobFound)
+      if (!blobFound) {
+        if (!navigator.onLine) return appFuncs.fakeResponse();
+
         return fetch(event.request.clone().url)
           .then((response) => {
             if (!response) {
@@ -122,7 +125,7 @@ self.addEventListener('fetch', (event) => {
 
             return resolve(response);
           });
-
+      }
       // blob found logic
       const contentType = appFuncs.getBlobType(blobFound, event.request.url);
       appFuncs.console()(`responding from cache: ${event.request.url}, contentType: ${contentType}, size: ${blobFound.size}`);
@@ -166,7 +169,6 @@ self.addEventListener('activate', (event) => {
     )
   );
 });
-*/
 
 self.addEventListener('sync', (event) => {
   appFuncs.console()(`sync event: ${JSON.stringify(event)}`);
@@ -180,3 +182,4 @@ self.addEventListener('message', (event) => {
   // event.data === whatever sent from Client.postMessage
   appFuncs.console()(`message event: ${JSON.stringify(event)}`);
 });
+*/

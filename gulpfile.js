@@ -2,17 +2,19 @@
 require('babel-core/register');
 require('./src/.globals');
 
-const
+const // eslint-disable
   babelify = require("babelify"),
   browserify = require("browserify"),
   // <----- convert from streaming to buffered vinyl file object
   buffer = require("vinyl-buffer"),
+  checkInternet = require('./src/server/checkconnection.js').checkInternet,
+  env = require('gulp-env'),
   envify = require("loose-envify"),
   es = require('event-stream'),
   eslint = require('gulp-eslint'),
   glob = require('glob'),
   gstylelint = require('gulp-stylelint'),
-  gulp = require("gulp"),
+  gulp = require('gulp'),
   gulpCopy = require('gulp-copy'),
   gulpif = require('gulp-if'),
   gulpSequence = require('gulp-sequence'),
@@ -225,7 +227,24 @@ gulp.task('copy:service-workers', (done) =>
     es.merge(tasks).on('end', done);
   }));
 
+gulp.task('checkconnection', (cb) =>
+  checkInternet((isConnected) => {
+    if (isConnected) {
+      console.log('is connected:', isConnected); // eslint-disable-line
+      env.set({
+        NODE_ONLINE: 'true'
+      });
+
+      return cb(null);
+    }
+
+    console.log('is not connected:', isConnected); // eslint-disable-line
+    return cb(null);
+  })
+);
+
 gulp.task("default", gulpSequence(
+  'checkconnection',
   'stylelint',
   'eslint',
   'test',

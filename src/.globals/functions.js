@@ -120,6 +120,12 @@ const appFuncs = {
     return Array.isArray(array) && array.length ?
      [...new Set(array)] :
      [];
+  },
+
+  fakeResponse() {
+    return new Response(new Blob(), {
+      "status" : 500 , "statusText" : "Sorry, you need to connect to the internet!"
+    });
   }
 }
 /**

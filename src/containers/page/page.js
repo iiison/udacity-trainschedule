@@ -4,13 +4,35 @@ import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import * as actionCreators from 'store/actions/index.js';
 import { bindActionCreators } from 'redux';
-
 import styles from './page.css';
+
+// import checkInternet from 'server/checkconnection.js';
 
 class Page extends React.Component {
   static propTypes = {
     children: React.PropTypes.node,
     msg: React.PropTypes.string,
+  }
+
+  /**
+   * only loads scripts if node has internet access
+   * @method getScripts
+   * @return {[type]}   [description]
+   */
+  getScripts = () => {
+    const nav = typeof navigator !== 'undefined' ? navigator : null;
+
+    return appConsts.nodeOnline || (nav && nav.onLine) ?
+      [
+        { src: 'https://cdn.logrocket.com/LogRocket.min.js', type: 'text/javascript' },
+        // to log session urls in production console.log(LogRocket.recordingURL);
+        // add the github integration https://github.com/integration/logrocket
+        {
+          innerHTML: `if (typeof LogRocket !== 'undefined') { LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: ${!appConsts.isProd && true} }); }`,
+          type: 'text/javascript',
+        }
+      ] :
+      [{}];
   }
 
   render () {
@@ -29,15 +51,7 @@ class Page extends React.Component {
             { content: 'React F Your Starterkit by @noahedwardhall', name: 'description' },
             { content: 'Home', property: 'og:title' },
           ]}
-          script={[
-            { src: 'https://cdn.logrocket.com/LogRocket.min.js', type: 'text/javascript' },
-            // to log session urls in production console.log(LogRocket.recordingURL);
-            // add the github integration https://github.com/integration/logrocket
-            {
-              innerHTML: `if (typeof LogRocket !== 'undefined') { LogRocket.init('noahedwardhall/trainschedule', { shouldShowReportingButton: ${!appConsts.isProd && true} }); }`,
-              type: 'text/javascript',
-            }
-          ]}
+          script={this.getScripts()}
           title='For Your Progressive React Starterkit'
         />
         <style scoped type='text/css'>{styles}</style>

@@ -259,6 +259,7 @@ class Start extends React.Component {
   getMoreInfo = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!navigator || !navigator.onLine) return null;
 
     let thisEl;
     const

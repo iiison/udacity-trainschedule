@@ -93,7 +93,7 @@ const appFuncs = {
       if (console.log) return console.log; // eslint-disable-line no-console
     }
 
-    return () => null;
+    return (f) => {null};
   },
 
   rollbar (type = 'reportMessage') {
@@ -107,7 +107,7 @@ const appFuncs = {
       if (this.rb[type]) return this.rb[type];
     }
 
-    return () => null;
+    return (f) => {null};
   },
 
   /**

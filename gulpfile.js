@@ -1,5 +1,6 @@
 /* eslint-disable multiline-ternary, no-unneeded-ternary */
 require('babel-core/register');
+require('./src/.globals');
 
 const
   babelify = require("babelify"),
@@ -29,21 +30,19 @@ const
   uglify = require('gulp-uglify'),
   watchify = require("watchify");
 
-const isProd = process.env.NODE_ENV === "production";
-
 function createBundler (useWatchify, server) {
   return browserify({
     browserField : server ? false : true,
     builtins : server ? false : true,
     cache: {},
     commondir : server ? false : true,
-    debug: !isProd,
+    debug: !appConsts.isProd,
     // ignore all globals
     detectGlobals: server ? false : true,
     entries: [`src/${server ? 'server' : 'client'}.js`],
-    fullPaths: !isProd,
+    fullPaths: !appConsts.isProd,
     packageCache: {},
-    plugin: isProd || !useWatchify ? [] : [[ lrload, {
+    plugin: appConsts.isProd || !useWatchify ? [] : [[ lrload, {
       client: true,
       host: '127.0.0.1',
       port: 4474,
@@ -52,7 +51,7 @@ function createBundler (useWatchify, server) {
     transform: [
       [ stringify, {
         appliesTo: { includeExtensions: ['.md'] },
-        minify: isProd
+        minify: appConsts.isProd
       }],
       [ postCss, {
         extensions: [ '.css', '.scss' ],
@@ -96,7 +95,7 @@ gulp.task('bundle:server', () => {
     .on("error", gutil.log)
     .pipe(source('server.js'))
     .pipe(buffer())
-    .pipe(gulpif(isProd, uglify()))
+    .pipe(gulpif(appConsts.isProd, uglify()))
     .pipe(gulp.dest('./dist'));
 });
 
@@ -108,7 +107,7 @@ gulp.task("bundle:client", () => {
     .on("error", gutil.log)
     .pipe(source("bundle.js"))
     .pipe(buffer())
-    .pipe(gulpif(isProd, uglify()))
+    .pipe(gulpif(appConsts.isProd, uglify()))
     .pipe(gulp.dest("./dist/public/js"));
 });
 
@@ -122,9 +121,9 @@ gulp.task("watch:client", () => {
       .on("error", gutil.log)
       .pipe(source("bundle.js"))
       .pipe(buffer())
-      .pipe(gulpif(!isProd, sourcemaps.init()))
-      .pipe(gulpif(isProd, uglify()))
-      .pipe(gulpif(!isProd, sourcemaps.write('./')))
+      .pipe(gulpif(!appConsts.isProd, sourcemaps.init()))
+      .pipe(gulpif(appConsts.isProd, uglify()))
+      .pipe(gulpif(!appConsts.isProd, sourcemaps.write('./')))
       .pipe(gulp.dest("./dist/public/js"));
   }
   // start JS file watching and rebundling with watchify
@@ -143,17 +142,17 @@ gulp.task("watch:server", () =>
     tasks: [ 'copy:service-workers', 'bundle:server' ],
     watch: [ 'src/server.js', 'dist/public/js/bundle.js', 'src/serviceworkers' ]
   })
-  .on("error", gutil.log)
-  .on("change", gutil.log)
-  .on("restart", gutil.log)
+    .on("error", gutil.log)
+    .on("change", gutil.log)
+    .on("restart", gutil.log)
 );
 
 gulp.task('test', () =>
   gulp.src(['./src/**/*.test.js'], { read: false })
     .pipe(mocha({
-      debugBrk: !isProd,
-      istanbul: !isProd,
-      reporter: !isProd ? 'spec' : 'nyan',
+      debugBrk: !appConsts.isProd,
+      istanbul: !appConsts.isProd,
+      reporter: !appConsts.isProd ? 'spec' : 'nyan',
       require: './.setup.test.js'
     }))
     .on("error", gutil.log)
@@ -178,16 +177,16 @@ gulp.task('eslint', () =>
 
 gulp.task('stylelint', () =>
   gulp
-  .src('src/**/*.css')
-  .pipe(gstylelint({
-    debug: !isProd,
-    failAfterError: true,
-    reporters: [
-      { console: true, formatter: 'verbose' },
-      { formatter: 'json', save: 'report.json' }
-    ],
-    reportOutputDir: 'coverage/lint',
-  }))
+    .src('src/**/*.css')
+    .pipe(gstylelint({
+      debug: !appConsts.isProd,
+      failAfterError: true,
+      reporters: [
+        { console: true, formatter: 'verbose' },
+        { formatter: 'json', save: 'report.json' }
+      ],
+      reportOutputDir: 'coverage/lint',
+    }))
 );
 
 gulp.task('copy:server-certs', () =>
@@ -208,7 +207,7 @@ gulp.task('copy:service-workers', (done) =>
         commondir: true,
         detectGlobals: true,
         entries: [entry],
-        fullPaths: isProd,
+        fullPaths: appConsts.isProd,
         packageCache: {},
         transform: [
           [ babelify, {}],
@@ -219,7 +218,7 @@ gulp.task('copy:service-workers', (done) =>
         .on("error", gutil.log)
         .pipe(source(entry))
         .pipe(buffer())
-        .pipe(gulpif(isProd, uglify()))
+        .pipe(gulpif(appConsts.isProd, uglify()))
         .pipe(rename({ dirname: '' }))
         .pipe(gulp.dest('./dist'))
     );
@@ -237,9 +236,6 @@ gulp.task("default", gulpSequence(
 ));
 
 gulp.task("prod", gulpSequence(
-  'stylelint',
-  'eslint',
-  'test',
   'copy:server-certs',
   'copy:service-workers',
   'bundle:server',

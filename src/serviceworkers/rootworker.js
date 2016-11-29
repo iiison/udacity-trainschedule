@@ -12,6 +12,8 @@
 require('../.globals');
 import Promised from 'bluebird';
 import Idbstore from 'serviceworkers/idb/idb';
+const protocol = self.location.protocol;
+appFuncs.console()(`protocol is: ${protocol}`);
 
 const db = new Idbstore();
 db.dbPromise
@@ -25,7 +27,6 @@ db.dbPromise
 
 // self = ServiceWorkerGlobalScope
 self.addEventListener('install', (event) => {
-  const protocol = self.location.protocol;
   const urlsToPrefetch = [
     '/',
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
@@ -71,8 +72,8 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
-    // `${protocol}://localhost:3000/js/bundle.js`,
-    // 'https://logrocket-1356.appspot.com/v1/ingest', // handled by neverCacheHttpMethods
+    // `${protocol}//localhost:3000/js/bundle.js`,
+    // `${protocol}//logrocket-1356.appspot.com/v1/ingest`, // handled by neverCacheHttpMethods
   ];
 
   const neverCacheHttpMethods = [
@@ -80,12 +81,12 @@ self.addEventListener('fetch', (event) => {
   ];
 
   // never cache urls
-  if (navigator.onLine && neverCacheUrls.indexOf(event.request.clone().url) > -1)
+  if (navigator.onLine && neverCacheUrls.indexOf(event.request.clone().url) !== -1)
      // appFuncs.console()(`not caching url: ${event.request.url} `);
     return event.respondWith(fetch(event.request));
 
   // never cache http methods
-  if (navigator.onLine && neverCacheHttpMethods.indexOf(event.request.clone().method) > -1)
+  if (navigator.onLine && neverCacheHttpMethods.indexOf(event.request.clone().method) !== -1)
     // appFuncs.console()(`not caching http method: ${event.request.url}, ${event.request.clone().method} `);
     return event.respondWith(fetch(event.request));
 

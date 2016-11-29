@@ -32,7 +32,7 @@ self.addEventListener('install', (event) => {
     'http://fonts.googleapis.com/css?family=Muli|Eczar|Varela%20Round',
     `${protocol}//localhost:3000/container.js`,
     `${protocol}//localhost:3000/favicon.ico`,
-    // `${protocol}//localhost:3000/js/bundle.js`, not in development
+    `${protocol}//localhost:3000/js/bundle.js`,
     `${protocol}//localhost:3000/rootworker.js`,
     'https://api.travis-ci.org/noahehall/udacity-trainschedule.svg?branch=master',
     'https://cdn.logrocket.com/LogRocket.min.js',
@@ -72,8 +72,8 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('fetch', (event) => {
   const neverCacheUrls = [
-    `${protocol}//localhost:3000/js/bundle.js`,
-    // 'https://logrocket-1356.appspot.com/v1/ingest', // handled by neverCacheHttpMethods
+    // `${protocol}//localhost:3000/js/bundle.js`,
+    // `${protocol}//logrocket-1356.appspot.com/v1/ingest`, // handled by neverCacheHttpMethods
   ];
 
   const neverCacheHttpMethods = [

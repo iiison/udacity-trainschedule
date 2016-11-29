@@ -101,6 +101,7 @@
     "livereactload": "latest",
     "loose-envify": "^1.2.0",
     "mocha": "^3.0.2",
+    "moment-duration-format": "^1.3.0",
     "nodemon": "^1.9.2",
     "nsp": "^2.6.2",
     "postcss-advanced-variables": "^1.2.2",

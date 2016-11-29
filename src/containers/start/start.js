@@ -346,13 +346,20 @@ class Start extends React.Component {
     try {
       const tableData = allSchedules.map((trip, idx) => ({
         arriveAt: `${trip.$.destTimeMin} ${trip.$.destTimeDate}`,
+        duration: time.getDuration({
+          endDate: trip.$.destTimeDate,
+          endTime: trip.$.destTimeMin,
+          startDate: trip.$.origTimeDate,
+          startTime: trip.$.origTimeMin,
+        }),
         id: idx,
         leaveAt: `${trip.$.origTimeMin} ${trip.$.origTimeDate}`,
       }));
 
       const tableColumns = [
-        { header: { label: 'Arrival' }, property: 'arriveAt' },
         { header: { label: 'Departure' }, property: 'leaveAt' },
+        { header: { label: 'Arrival' }, property: 'arriveAt' },
+        { header: { label: 'Duration' }, property: 'duration' },
       ];
 
       return [
@@ -375,6 +382,8 @@ class Start extends React.Component {
         </Table.Provider>
       ];
     } catch (err) {
+      appFuncs.console('error')(`error received in getSavedSchedules: ${err}`);
+
       return null;
     }
   }
@@ -452,8 +461,8 @@ class Start extends React.Component {
               getStations: this.getStations,
               handleClockChange: this.handleClockChange,
               handleClockSave: this.handleClockSave,
+              handleClockShow: this.handleClockShowTime,
               handleClockShowDate: this.handleClockShowDate,
-              handleClockShowTime: this.handleClockShowTime,
               handleSubmit: this.handleSubmit,
               Popup,
               thisMoment: this.state.m,

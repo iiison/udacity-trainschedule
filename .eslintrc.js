@@ -39,7 +39,7 @@ module.exports = {
   "env": {
     "browser": true,
     "node": true,
-    "amd": false,
+    "amd": true,
     "mocha": true,
     "jasmine": false,
     "phantomjs": false,
@@ -48,7 +48,6 @@ module.exports = {
     "shelljs": false,
     "commonjs": true,
     "es6": true,
-    "node": true
   },
   "plugins": [
     "react",
@@ -62,11 +61,11 @@ module.exports = {
     }
   },
   "rules": {
-    "import/no-unresolved": [2, {commonjs: true, amd: true}],
-    "import/named": 2,
-    "import/namespace": 2,
-    "import/default": 2,
-    "import/export": 2,
+    "import/no-unresolved": 0, //[0, {commonjs: true, amd: true}],
+    "import/named": 0,
+    "import/namespace": 0, //[1, { allowComputed: true }],
+    "import/default": 0,
+    "import/export": 0,
     "flowtype/boolean-style": [
       0,
       "boolean"
@@ -347,13 +346,13 @@ module.exports = {
     "no-useless-rename": 2,
     "no-var": 2,
     "no-void": 2,
-    "no-warning-comments": 2,
+    "no-warning-comments": [1, { "terms": ["todo", "fixme", "gotcha"], "location": "anywhere" }],
     "no-whitespace-before-property": 2,
     "no-with": 2,
     "no-wrap-func": 0,
     "object-curly-newline": 0,
     "object-curly-spacing": [2, "always"],
-    "object-property-newline": 0,
+    "object-property-newline": [2, { "allowMultiplePropertiesPerLine": true }],
     "object-shorthand": 0,
     "one-var": 0,
     "one-var-declaration-per-line": 0,
@@ -367,7 +366,7 @@ module.exports = {
     "prefer-rest-params": 2,
     "prefer-spread": 2,
     "prefer-template": 1,
-    "quote-props": 0,
+    "quote-props": [2, "as-needed", { "keywords": true, "unnecessary": false }],
     "quotes": 0,
     "radix": 0,
     "react/display-name": 0,
